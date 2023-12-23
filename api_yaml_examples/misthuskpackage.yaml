@@ -1,0 +1,12 @@
+---
+apiVersion: mistletoe.dev/v1alpha1
+kind: MistHuskPackage
+metadata:
+  name: example-nginx
+  labels:
+    mistletoe.dev/group: mistletoe-examples
+spec:
+  functions:
+    generate: mistletoe_generate
+    alloc: mistletoe_alloc
+    dealloc: mistletoe_dealloc
