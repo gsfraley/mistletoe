@@ -1,14 +1,12 @@
-extern crate mistletoe_core;
+extern crate mistletoe_api;
 
-#[cfg(test)]
-mod tests;
+mod generate;
 
 use std::sync::atomic::AtomicPtr;
-use mistletoe_core::MistOutput;
+use self::generate::generate;
 
-use indoc::*;
+use indoc::{concatdoc};
 use once_cell::sync::Lazy;
-use serde::{Deserialize};
 use wasm_bindgen::prelude::*;
 
 const INFO: &'static str = concatdoc! {"

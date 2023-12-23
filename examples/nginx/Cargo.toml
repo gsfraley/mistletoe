@@ -6,9 +6,6 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
-[dependencies.mistletoe-core]
-path = "../../core"
-
 [dependencies]
 indoc = "2.0"
 k8s-openapi = { version = "0.20", features = ["v1_28"] }
@@ -17,3 +14,5 @@ serde = { version = "1.0", features = ["derive"] }
 serde_yaml = "0.9"
 wasm-bindgen = "0.2"
 
+[dependencies.mistletoe-api]
+path = "../../mistletoe-api"

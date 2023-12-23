@@ -1,0 +1,19 @@
+[package]
+name = "mistletoe"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+serde = "1.0"
+serde_yaml = "0.9"
+wasmer = "4.2"
+
+[dependencies.mistletoe-api]
+path = "./mistletoe-api"
+
+[workspace]
+members = [
+    "mistletoe-api",
+    "examples/nginx",
+]
