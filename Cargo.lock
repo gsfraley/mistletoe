@@ -655,12 +655,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "mistletoe-bind"
+version = "0.1.0"
+dependencies = [
+ "quote",
+]
+
+[[package]]
 name = "mistletoe-example-nginx"
 version = "0.1.0"
 dependencies = [
  "indoc",
  "k8s-openapi",
  "mistletoe-api",
+ "mistletoe-bind",
  "once_cell",
  "serde",
  "serde_yaml",

@@ -28,7 +28,6 @@ pub fn run_package(path: &Path, input: String) -> anyhow::Result<()> {
     memory.view(&mut store).read(info_ptr_ptr as u64, &mut info_ptr_buf)?;
     let info_ptr = i32::from_le_bytes(info_ptr_buf[0..4].try_into()?);
     let info_len = i32::from_le_bytes(info_ptr_buf[4..8].try_into()?);
-    dbg!(info_ptr, info_len);
     let mut info_buf: Vec<u8> = vec![0; info_len as usize];
     memory.view(&mut store).read(info_ptr as u64, &mut info_buf[..])?;
     let info = String::from_utf8(info_buf)?;

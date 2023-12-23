@@ -16,3 +16,6 @@ wasm-bindgen = "0.2"
 
 [dependencies.mistletoe-api]
 path = "../../mistletoe-api"
+
+[dependencies.mistletoe-bind]
+path = "../../mistletoe-bind"

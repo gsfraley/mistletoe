@@ -5,7 +5,7 @@ mod generate;
 use std::sync::atomic::AtomicPtr;
 use self::generate::generate;
 
-use indoc::{concatdoc};
+use indoc::concatdoc;
 use once_cell::sync::Lazy;
 use wasm_bindgen::prelude::*;
 
