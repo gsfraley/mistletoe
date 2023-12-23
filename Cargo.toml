@@ -18,6 +18,6 @@ path = "./mistletoe-api"
 [workspace]
 members = [
     "mistletoe-api",
-    "mistletoe-bind",
+    "mistletoe-macros",
     "examples/nginx",
 ]

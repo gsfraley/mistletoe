@@ -1,22 +1,38 @@
+use mistletoe_api::v0_1::MistHuskPackage;
+
+use indexmap::IndexMap;
 use proc_macro::TokenStream;
 use quote::quote;
+use serde::Deserialize;
+use serde_yaml;
+use unindent::unindent;
+
+#[derive(Deserialize, Debug)]
+struct MistHuskHeaders {
+    name: String,
+    #[serde(default)]
+    labels: Option<IndexMap<String, String>>,
+}
 
 #[proc_macro]
 pub fn misthusk_headers(input: TokenStream) -> TokenStream {
+    let header_string_unfmt = input.into_iter().next().unwrap().to_string();
+    let header_string = unindent(&header_string_unfmt[1..header_string_unfmt.len()-1]);
+    let headers: MistHuskHeaders = serde_yaml::from_str(&header_string).unwrap();
+
+    let misthuskpackage = MistHuskPackage {
+        name: headers.name,
+        labels: headers.labels,
+
+        function_generate: Some("mistletoe_generate".to_string()),
+        function_alloc: Some("mistletoe_alloc".to_string()),
+        function_dealloc: Some("mistletoe_dealloc".to_string()),
+    };
+
+    let misthuskpackage_string = serde_yaml::to_string(&misthuskpackage).unwrap();
+
     quote! {
-        const INFO: &'static str = concatdoc! {"
-            apiVersion: mistletoe.dev/v1alpha1
-            kind: MistHuskPackage
-            metadata:
-              name: example-nginx
-              labels:
-                mistledoe.dev/group: mistletoe-examples
-            spec:
-              functions:
-                generate: mistletoe_generate
-                alloc: mistletoe_alloc
-                dealloc: mistletoe_dealloc
-        "};
+        const INFO: &'static str = #misthuskpackage_string;
         
         static INFO_PTR: Lazy<AtomicPtr<[usize; 2]>> = Lazy::new(|| {
             let wide_ptr = Box::new([INFO.as_ptr() as usize, INFO.len()]);

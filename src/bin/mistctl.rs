@@ -1,20 +1,19 @@
 extern crate mistletoe_api;
 
 use std::path::Path;
-use mistletoe_api::v0_1::MistResult;
-use wasmer::{Store, Module, Memory, MemoryType, Instance, TypedFunction, imports};
+use wasmer::{Store, Module, Instance, TypedFunction, imports};
 
 pub fn main() -> anyhow::Result<()> {
     let args: Vec<String> = std::env::args().collect();
     let module_path = Path::new(&args[1]);
-    let input_path = Path::new(&args[2]);
+    let _input_path = Path::new(&args[2]);
     let input = "".to_string(); //String::from_utf8(std::fs::read(input_path)?)?;
     run_package(module_path, input)?;
 
     Ok(())
 }
 
-pub fn run_package(path: &Path, input: String) -> anyhow::Result<()> {
+pub fn run_package(path: &Path, _input: String) -> anyhow::Result<()> {
     let mut store = Store::default();
     let module = Module::from_file(&store, path)?;
     let import_object = imports! {};

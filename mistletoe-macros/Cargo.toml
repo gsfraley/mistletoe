@@ -1,0 +1,18 @@
+[package]
+name = "mistletoe-macros"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+indexmap = "2.1"
+indoc = "2.0"
+quote = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+unindent = "0.2"
+
+[dependencies.mistletoe-api]
+path = "../mistletoe-api"

@@ -7,6 +7,7 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+indexmap = "2.1"
 indoc = "2.0"
 k8s-openapi = { version = "0.20", features = ["v1_28"] }
 once_cell = "1.19.0"
@@ -17,5 +18,5 @@ wasm-bindgen = "0.2"
 [dependencies.mistletoe-api]
 path = "../../mistletoe-api"
 
-[dependencies.mistletoe-bind]
-path = "../../mistletoe-bind"
+[dependencies.mistletoe-macros]
+path = "../../mistletoe-macros"

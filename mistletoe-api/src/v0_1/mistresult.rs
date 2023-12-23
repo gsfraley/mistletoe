@@ -1,11 +1,10 @@
-use std::collections::HashMap;
-
+use indexmap::IndexMap;
 use serde::{de, Serialize, Deserialize, Serializer, Deserializer};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub enum MistResult {
     Ok {
-        files: HashMap<String, String>,
+        files: IndexMap<String, String>,
     },
     Err {
         message: String,
@@ -24,7 +23,7 @@ struct MistResultLayout {
 struct MistResultLayoutData {
     result: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
-    files: Option<HashMap<String, String>>,
+    files: Option<IndexMap<String, String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     message: Option<String>,
 }
@@ -112,6 +111,9 @@ mod tests {
         let mistresult = MistResult::Err { message: "something failed".to_string() };
         let yaml = serde_yaml::to_string(&mistresult).unwrap();
         assert_eq!(expected_yaml, yaml);
+
+        let mistresult_parsed = serde_yaml::from_str(&yaml).unwrap();
+        assert_eq!(mistresult, mistresult_parsed);
     }
 
     #[test]
@@ -142,7 +144,7 @@ mod tests {
                       containerPort: http
         "};
 
-        let mut files = HashMap::new();
+        let mut files = IndexMap::new();
         files.insert("namespace.yaml".to_string(), indoc! {"
             apiVersion: v1
             kind: Namespace
@@ -167,5 +169,8 @@ mod tests {
         let mistresult = MistResult::Ok { files };
         let yaml = serde_yaml::to_string(&mistresult).unwrap();
         assert_eq!(expected_yaml, yaml);
+
+        let mistresult_parsed = serde_yaml::from_str(&yaml).unwrap();
+        assert_eq!(mistresult, mistresult_parsed);
     }
 }
