@@ -1,16 +1,16 @@
 # **Mistletoe** Package Manager
 
-## Run WASM, Get Kubernetes Yaml
+## Run WASM, Get Kubernetes YAML
 
 WebAssembly is a revolutionary technology that enables developers to run code in a wide array of languages in a sandboxed environment.  It was established to provide a near-native code target for languages that could run in a browser, but it's been heavily put to use in various other places as a portable and embedded runtime.
 
-**Mistletoe** is a Kubernetes package manager, but with a slightly different goal than other established package managers and resource utilities.  For example, *Helm* is SO good 🤌.  Super well developed and stable pattern where you write Golang templates that take some input YAML and spits out a whole lot of output YAML.
+**Mistletoe** is a Kubernetes package manager, but with a slightly different goal than other established package managers and resource utilities.  For example, *Helm* is SO good 🤌, and makes a lot of complex cluster installations dead simple.  Super well developed and stable pattern where you write Golang templates that take some input YAML and spits out a whole lot of output YAML.
 
 But it has constraints in the package development lifecycle itself.  Creating large interconnections of services, whether you do it in one package or split it into a handful of dependent packages, is rough.  Some might relate, but I found myself trying to put *a lot* of logic in places that didn't fit to cover all sorts of edge-cases.
 
 So what can I do?  I could write another package manager with a different templating language I fancy more, or try to find an existing solution that suits my problem better, but then I'm hunting down different tooling for different use cases in the same problem area and fracturing all my workflows.
 
-The goal of **Mistletoe** is to eliminate **all** limitations on what can be done for package maintainers.  Fundamentally, the package logic of all the existing solutions is roughly the same.  Ya put configuration text in, ya get Kubernetes resource YAML text out.  You can probably see where this is going -- **Mistletoe** really just provides a thin runtime that sends this configuration text into an arbitrary WASM module that runs all its own maths and computations that hands the Kubernetes resource YAML text back.
+The goal of **Mistletoe** is to eliminate **all** limitations on what can be done by package maintainers.  Fundamentally, the package logic of all the existing solutions is roughly the same.  Ya put configuration text in, ya get Kubernetes resource YAML text out.  You can probably see where this is going -- **Mistletoe** really just provides a thin runtime that sends this configuration text into an arbitrary WASM module that runs all its own maths and computations then hands the Kubernetes resource YAML text back.
 
 So instead of packaging its *own* logic, **Mistletoe** really just calls *other* people's logic, eliminating any effort I have to spend writing *my own* (/s).
 
