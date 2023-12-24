@@ -45,3 +45,7 @@ pub fn generate(input: &str) -> String {
 ```
 
 The above example takes a single-line input YAML, e.g. `name: my-namespace`, and spits out a Namespace with that name.  It makes use of some library support I've provided for Rust, and I'll be improving how that looks as time goes on, but its worth noting that there's not a whole lot I *can* provide given how simple it already is.
+
+## Where are things at now?
+
+Right now, there's just a whoolleee lotta prototype code, nothing coherent.  But given how quickly its coming along, I don't expect it'll be long until there's something usable.  I'll be providing more updates, documentation, and write-ups on where I want this to go, but right now I'm only shopping for interest before I really start pouring some sweat into it.
