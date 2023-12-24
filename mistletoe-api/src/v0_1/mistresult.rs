@@ -3,12 +3,34 @@ use serde::{de, Serialize, Deserialize, Serializer, Deserializer};
 
 #[derive(Clone, PartialEq, Debug)]
 pub enum MistResult {
-    Ok {
-        files: IndexMap<String, String>,
-    },
-    Err {
-        message: String,
-    },
+    Ok { files: MistResultFiles },
+    Err { message: String },
+}
+
+#[derive(Clone, PartialEq, Debug)]
+pub struct MistResultFiles {
+    files: IndexMap<String, String>,
+}
+
+impl MistResultFiles {
+    pub fn new() -> Self {
+        Self {
+            files: IndexMap::new(),
+        }
+    }
+
+    pub fn add_file(mut self, name: String, content: String) -> Self {
+        self.files.insert(name, content);
+        self
+    }
+}
+
+impl Into<MistResult> for MistResultFiles {
+    fn into(self) -> MistResult {
+        MistResult::Ok {
+            files: self
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -33,7 +55,7 @@ impl From<MistResult> for MistResultLayout {
         let mrld = match mr {
             MistResult::Ok { files } => MistResultLayoutData {
                 result: "Ok".to_string(),
-                files: Some(files),
+                files: Some(files.files),
                 message: None,
             },
             MistResult::Err { message } => MistResultLayoutData {
@@ -44,7 +66,7 @@ impl From<MistResult> for MistResultLayout {
         };
 
         Self {
-            apiVersion: "v1alpha1".to_string(),
+            apiVersion: "mistletoe.dev/v1alpha1".to_string(),
             kind: "MistResult".to_string(),
             data: mrld,
         }
@@ -58,7 +80,7 @@ impl TryInto<MistResult> for MistResultLayout {
         match self.data.result.as_str() {
             "Ok" => {
                 match self.data.files {
-                    Some(files) => Ok(MistResult::Ok { files }),
+                    Some(files) => Ok(MistResult::Ok { files: MistResultFiles { files } }),
                     None => Err("\"files\" must be defined on \"Ok\" results".to_string()),
                 }
             },
@@ -101,7 +123,7 @@ mod tests {
     #[test]
     fn test_mistresult_err() {
         let expected_yaml = indoc! {"
-            apiVersion: v1alpha1
+            apiVersion: mistletoe.dev/v1alpha1
             kind: MistResult
             data:
               result: Err
@@ -119,7 +141,7 @@ mod tests {
     #[test]
     fn test_mistresult_ok() {
         let expected_yaml = indoc! {"
-            apiVersion: v1alpha1
+            apiVersion: mistletoe.dev/v1alpha1
             kind: MistResult
             data:
               result: Ok
@@ -144,27 +166,27 @@ mod tests {
                       containerPort: http
         "};
 
-        let mut files = IndexMap::new();
-        files.insert("namespace.yaml".to_string(), indoc! {"
-            apiVersion: v1
-            kind: Namespace
-            metadata:
-              name: my-namespace
-        "}.to_string());
-        files.insert("resources/service.yaml".to_string(), indoc! {"
-            apiVersion: v1
-            kind: Service
-            metadata:
-              name: my-nginx
-            spec:
-              type: LoadBalancer
-              selector:
-                app: my-nginx
-              ports:
-              - name: http
-                port: 80
-                containerPort: http
-        "}.to_string());
+        let files = MistResultFiles::new()
+            .add_file("namespace.yaml".to_string(), indoc! {"
+                apiVersion: v1
+                kind: Namespace
+                metadata:
+                  name: my-namespace
+            "}.to_string())
+            .add_file("resources/service.yaml".to_string(), indoc! {"
+                apiVersion: v1
+                kind: Service
+                metadata:
+                  name: my-nginx
+                spec:
+                  type: LoadBalancer
+                  selector:
+                    app: my-nginx
+                  ports:
+                  - name: http
+                    port: 80
+                    containerPort: http
+            "}.to_string());
 
         let mistresult = MistResult::Ok { files };
         let yaml = serde_yaml::to_string(&mistresult).unwrap();

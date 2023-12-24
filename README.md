@@ -28,19 +28,16 @@ struct InputConfig {
     name: String,
 }
 
-pub fn generate(input: &str) -> String {
-    let input_config: InputConfig = serde_yaml::from_str(input).unwrap();
-
-    let mut files = IndexMap::new();
-    files.insert("namespace.yaml".to_string(), formatdoc!{"
-        ---
-        apiVersion: apps/v1
-        kind: Namespace
-        metadata:
-          name: {0}
-    ", input_config.name});
-
-    serde_yaml::to_string(&MistResult::Ok { files }).unwrap()
+pub fn generate(input_config: InputConfig) -> MistResult {
+    MistResultFiles::new()
+        .add_file("namespace.yaml".to_string(), formatdoc!{"
+            ---
+            apiVersion: apps/v1
+            kind: Namespace
+            metadata:
+              name: {0}
+        ", input_config.name})
+        .into()
 }
 ```
 

@@ -21,6 +21,6 @@ fn main() {
     if let Some(matches) = matches.subcommand_matches("generate") {
         let module_path = matches.get_one::<PathBuf>("module").unwrap();
         let mut module = MistHuskModule::from_file(&module_path).unwrap();
-        println!("{}", module.generate("name: my-nginx\nnamespace: my-namespace").unwrap());
+        println!("{}", module.generate("apiVersion: mistletoe.dev/v1alpha1\nkind: MistHuskInput\ndata:\n  name: my-nginx\n  namespace: my-namespace").unwrap());
     }
 }

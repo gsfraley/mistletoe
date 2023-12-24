@@ -45,7 +45,7 @@ struct MistHuskPackageLayoutSpecFunctions {
 impl From<MistHuskPackage> for MistHuskPackageLayout {
     fn from(mhp: MistHuskPackage) -> MistHuskPackageLayout {
         MistHuskPackageLayout {
-            apiVersion: "v1alpha1".to_string(),
+            apiVersion: "mistletoe.dev/v1alpha1".to_string(),
             kind: "MistHuskPackage".to_string(),
             metadata: MistHuskPackageLayoutMetadata {
                 name: mhp.name,
@@ -108,12 +108,12 @@ mod tests {
             metadata:
               name: example-nginx
               labels:
-                mistledoe.dev/group: mistletoe-examples
+                mistletoe.dev/group: mistletoe-examples
             spec:
               functions:
-                generate: mistletoe_generate
-                alloc: mistletoe_alloc
-                dealloc: mistletoe_dealloc
+                generate: __mistletoe_generate
+                alloc: __mistletoe_alloc
+                dealloc: __mistletoe_dealloc
         "};
 
         let mut labels = IndexMap::new();
@@ -123,13 +123,13 @@ mod tests {
             name: "example-nginx".to_string(),
             labels: Some(labels),
 
-            function_generate: Some("mistletoe_generate".to_string()),
-            function_alloc: Some("mistletoe_alloc".to_string()),
-            function_dealloc: Some("mistletoe_dealloc".to_string()),
+            function_generate: Some("__mistletoe_generate".to_string()),
+            function_alloc: Some("__mistletoe_alloc".to_string()),
+            function_dealloc: Some("__mistletoe_dealloc".to_string()),
         };
 
         let yaml = serde_yaml::to_string(&misthuskpackage).unwrap();
-        assert_eq!(expected_yaml, yaml);
+        assert_eq!(expected_yaml, yaml, "left:\n{expected_yaml}\nright:\n{expected_yaml}");
 
         let misthuskpackage_parsed = serde_yaml::from_str(&yaml).unwrap();
         assert_eq!(misthuskpackage, misthuskpackage_parsed);

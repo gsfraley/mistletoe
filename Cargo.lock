@@ -742,6 +742,7 @@ dependencies = [
 name = "mistletoe-example-nginx"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "indexmap 2.1.0",
  "indoc",
  "k8s-openapi",

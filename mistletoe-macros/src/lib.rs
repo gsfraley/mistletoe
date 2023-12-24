@@ -59,13 +59,23 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
                 std::alloc::dealloc(ptr, layout);
             }
         }
+
+        fn __mistletoe_generate_result(input_str: &str) -> anyhow::Result<MistResult> {
+            let input: mistletoe_api::v0_1::MistHuskInput = serde_yaml::from_str(input_str)?;
+            Ok(generate(input.try_into_data()?))
+        }
         
         #[wasm_bindgen]
         pub fn __mistletoe_generate(ptr: *const u8, len: usize) -> *mut [usize; 2] {
-            let input = unsafe { std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap() };
-            let mut output = generate(input).into_boxed_str();
-            let retptr = Box::into_raw(Box::new([output.as_mut_ptr() as usize, output.len()]));
-            std::mem::forget(output);
+            let input_str = unsafe { std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap() };
+            let result = __mistletoe_generate_result(input_str);
+
+            let mistresult = result.unwrap_or_else(|e| {
+                MistResult::Err { message: format!("{:?}\n\n[input]\n{}", e, input_str) }
+            });
+
+            let mut output_str = std::mem::ManuallyDrop::new(serde_yaml::to_string(&mistresult).unwrap());
+            let retptr = Box::into_raw(Box::new([output_str.as_mut_ptr() as usize, output_str.len()]));
             retptr
         }
     }.into()
