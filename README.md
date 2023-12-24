@@ -1,6 +1,6 @@
 ![Mistletoe logo](logo.jpg)
 
-# Mistletoe Package Manager
+# Mistletoe Package Manager (WIP)
 
 ## Run WASM, Get Kubernetes YAML
 
