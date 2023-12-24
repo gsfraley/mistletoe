@@ -8,6 +8,7 @@ name = "mistctl"
 
 [dependencies]
 anyhow = "1.0"
+clap = "4.4"
 serde = "1.0"
 serde_yaml = "0.9"
 wasmer = "4.2"

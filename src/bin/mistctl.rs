@@ -1,36 +1,26 @@
-extern crate mistletoe_api;
+use std::path::PathBuf;
 
-use std::path::Path;
-use wasmer::{Store, Module, Instance, TypedFunction, imports};
+use clap::{Command, value_parser, arg};
+use mistletoe::module::MistHuskModule;
 
-pub fn main() -> anyhow::Result<()> {
-    let args: Vec<String> = std::env::args().collect();
-    let module_path = Path::new(&args[1]);
-    let _input_path = Path::new(&args[2]);
-    let input = "".to_string(); //String::from_utf8(std::fs::read(input_path)?)?;
-    run_package(module_path, input)?;
+fn main() {
+    let matches = Command::new(env!("CARGO_CRATE_NAME"))
+        .about("Next-level Kubernetes package manager")
+        .subcommand(
+            Command::new("generate")
+                .about("Generate output YAML from a module")
+                .arg(arg!([module] "module to call")
+                    .required(true)
+                    .value_parser(value_parser!(PathBuf)))
+                .arg(arg!(-f --inputfile <FILE> "input file containing values to pass to the module")
+                    .value_parser(value_parser!(PathBuf)))
+                .arg(arg!(-s --set <VALUES> "set values to pass to the module")),
+        )
+        .get_matches();
 
-    Ok(())
-}
-
-pub fn run_package(path: &Path, _input: String) -> anyhow::Result<()> {
-    let mut store = Store::default();
-    let module = Module::from_file(&store, path)?;
-    let import_object = imports! {};
-    let instance = Instance::new(&mut store, &module, &import_object)?;
-    let memory = instance.exports.get_memory("memory")?;
-
-    let mistletoe_info: TypedFunction<(), i32>
-        = instance.exports.get_typed_function(&mut store, "mistletoe_info")?;
-    let info_ptr_ptr = mistletoe_info.call(&mut store)?;
-    let mut info_ptr_buf: [u8; 8] = [0; 8];
-    memory.view(&mut store).read(info_ptr_ptr as u64, &mut info_ptr_buf)?;
-    let info_ptr = i32::from_le_bytes(info_ptr_buf[0..4].try_into()?);
-    let info_len = i32::from_le_bytes(info_ptr_buf[4..8].try_into()?);
-    let mut info_buf: Vec<u8> = vec![0; info_len as usize];
-    memory.view(&mut store).read(info_ptr as u64, &mut info_buf[..])?;
-    let info = String::from_utf8(info_buf)?;
-    println!("{}", info);
-
-    Ok(())
+    if let Some(matches) = matches.subcommand_matches("generate") {
+        let module_path = matches.get_one::<PathBuf>("module").unwrap();
+        let mut module = MistHuskModule::from_file(&module_path).unwrap();
+        println!("{}", module.generate("name: my-nginx\nnamespace: my-namespace").unwrap());
+    }
 }

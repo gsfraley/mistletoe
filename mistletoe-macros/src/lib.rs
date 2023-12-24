@@ -24,9 +24,9 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
         name: headers.name,
         labels: headers.labels,
 
-        function_generate: Some("mistletoe_generate".to_string()),
-        function_alloc: Some("mistletoe_alloc".to_string()),
-        function_dealloc: Some("mistletoe_dealloc".to_string()),
+        function_generate: Some("__mistletoe_generate".to_string()),
+        function_alloc: Some("__mistletoe_alloc".to_string()),
+        function_dealloc: Some("__mistletoe_dealloc".to_string()),
     };
 
     let misthuskpackage_string = serde_yaml::to_string(&misthuskpackage).unwrap();
@@ -40,12 +40,12 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
         });
         
         #[wasm_bindgen]
-        pub fn mistletoe_info() -> *mut [usize; 2] {
+        pub fn __mistletoe_info() -> *mut [usize; 2] {
             unsafe { *INFO_PTR.as_ptr() }
         }
         
         #[wasm_bindgen]
-        pub fn mistletoe_alloc(len: usize) -> *mut u8 {
+        pub fn __mistletoe_alloc(len: usize) -> *mut u8 {
             unsafe {
                 let layout = std::alloc::Layout::from_size_align(len, std::mem::align_of::<u8>()).unwrap();
                 std::alloc::alloc(layout)
@@ -53,7 +53,7 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
         }
         
         #[wasm_bindgen]
-        pub fn mistletoe_dealloc(ptr: *mut u8, len: usize) {
+        pub fn __mistletoe_dealloc(ptr: *mut u8, len: usize) {
             unsafe {
                 let layout = std::alloc::Layout::from_size_align(len, std::mem::align_of::<u8>()).unwrap();
                 std::alloc::dealloc(ptr, layout);
@@ -61,7 +61,7 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
         }
         
         #[wasm_bindgen]
-        pub fn mistletoe_generate(ptr: *const u8, len: usize) -> *mut [usize; 2] {
+        pub fn __mistletoe_generate(ptr: *const u8, len: usize) -> *mut [usize; 2] {
             let input = unsafe { std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap() };
             let mut output = generate(input).into_boxed_str();
             let retptr = Box::into_raw(Box::new([output.as_mut_ptr() as usize, output.len()]));
