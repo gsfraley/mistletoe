@@ -18,7 +18,7 @@ To give a more concrete example, here's the simplest possible Rust example:
 
 ```rust
 misthusk_headers! {"
-  name: example-nginx
+  name: example-namespace
   labels:
     mistletoe.dev/group: mistletoe-examples
 "}
