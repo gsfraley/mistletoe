@@ -34,17 +34,19 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
     quote! {
         const INFO: &'static str = #misthuskpackage_string;
         
-        static INFO_PTR: Lazy<AtomicPtr<[usize; 2]>> = Lazy::new(|| {
+        static INFO_PTR: mistletoe_bind::include::once_cell::sync::Lazy<std::sync::atomic::AtomicPtr<[usize; 2]>>
+            = mistletoe_bind::include::once_cell::sync::Lazy::new(||
+        {
             let wide_ptr = Box::new([INFO.as_ptr() as usize, INFO.len()]);
-            AtomicPtr::new(Box::into_raw(wide_ptr))
+            std::sync::atomic::AtomicPtr::new(Box::into_raw(wide_ptr))
         });
         
-        #[wasm_bindgen]
+        #[wasm_bindgen::prelude::wasm_bindgen]
         pub fn __mistletoe_info() -> *mut [usize; 2] {
             unsafe { *INFO_PTR.as_ptr() }
         }
         
-        #[wasm_bindgen]
+        #[wasm_bindgen::prelude::wasm_bindgen]
         pub fn __mistletoe_alloc(len: usize) -> *mut u8 {
             unsafe {
                 let layout = std::alloc::Layout::from_size_align(len, std::mem::align_of::<u8>()).unwrap();
@@ -52,7 +54,7 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
             }
         }
         
-        #[wasm_bindgen]
+        #[wasm_bindgen::prelude::wasm_bindgen]
         pub fn __mistletoe_dealloc(ptr: *mut u8, len: usize) {
             unsafe {
                 let layout = std::alloc::Layout::from_size_align(len, std::mem::align_of::<u8>()).unwrap();
@@ -60,12 +62,12 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
             }
         }
 
-        fn __mistletoe_generate_result(input_str: &str) -> anyhow::Result<MistResult> {
-            let input: mistletoe_api::v0_1::MistHuskInput = serde_yaml::from_str(input_str)?;
+        fn __mistletoe_generate_result(input_str: &str) -> mistletoe_bind::include::anyhow::Result<MistResult> {
+            let input: mistletoe_bind::api::v0_1::MistHuskInput = mistletoe_bind::include::serde_yaml::from_str(input_str)?;
             Ok(generate(input.try_into_data()?))
         }
         
-        #[wasm_bindgen]
+        #[wasm_bindgen::prelude::wasm_bindgen]
         pub fn __mistletoe_generate(ptr: *const u8, len: usize) -> *mut [usize; 2] {
             let input_str = unsafe { std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap() };
             let result = __mistletoe_generate_result(input_str);
@@ -74,7 +76,7 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
                 MistResult::Err { message: format!("{:?}\n\n[input]\n{}", e, input_str) }
             });
 
-            let mut output_str = std::mem::ManuallyDrop::new(serde_yaml::to_string(&mistresult).unwrap());
+            let mut output_str = std::mem::ManuallyDrop::new(mistletoe_bind::include::serde_yaml::to_string(&mistresult).unwrap());
             let retptr = Box::into_raw(Box::new([output_str.as_mut_ptr() as usize, output_str.len()]));
             retptr
         }

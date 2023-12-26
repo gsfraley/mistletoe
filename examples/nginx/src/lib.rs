@@ -1,13 +1,8 @@
-extern crate mistletoe_api;
-
-use std::sync::atomic::AtomicPtr;
 use mistletoe_api::v0_1::{MistResult, MistResultFiles};
-use mistletoe_macros::misthusk_headers;
+use mistletoe_bind::misthusk_headers;
 
 use indoc::formatdoc;
-use once_cell::sync::Lazy;
 use serde::Deserialize;
-use wasm_bindgen::prelude::*;
 
 misthusk_headers! {"
   name: example-nginx
