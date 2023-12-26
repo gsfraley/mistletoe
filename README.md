@@ -14,7 +14,7 @@ Helm Charts are YAML templates in the Golang templating language.  It's very sim
 
 That depends on what the developer wants to do.  It turns out that pretty much any language that has a YAML parsing library works almost perfectly.  Ultimately, all we're doing is taking a string and returning a string.
 
-To give a more concrete example, here's the simplest possible Rust example:
+To give a more concrete example, here's a simple Rust snippet:
 
 ```rust
 misthusk_headers! {"
@@ -28,16 +28,17 @@ struct InputConfig {
     name: String,
 }
 
-pub fn generate(input_config: InputConfig) -> MistResult {
-    MistResultFiles::new()
-        .add_file("namespace.yaml".to_string(), formatdoc!{"
+pub fn generate(input_config: InputConfig) -> MistHuskResult {
+    let output = MistHuskOutput::new()
+        .with_file("namespace.yaml".to_string(), formatdoc!{"
             ---
             apiVersion: apps/v1
             kind: Namespace
             metadata:
               name: {0}
-        ", input_config.name})
-        .into()
+        ", input_config.name});
+
+    Ok(output)
 }
 ```
 

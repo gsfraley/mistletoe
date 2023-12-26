@@ -26,13 +26,21 @@ impl MistHuskOutput {
         }
     }
 
-    pub fn with_message(mut self, message: String) -> Self {
+    pub fn set_message(&mut self, message: String) {
         self.message = Some(message);
+    }
+
+    pub fn with_message(mut self, message: String) -> Self {
+        self.set_message(message);
         self
     }
 
-    pub fn with_file(mut self, filename: String, content: String) -> Self {
+    pub fn add_file(&mut self, filename: String, content: String) {
         self.files.insert(filename, content);
+    }
+
+    pub fn with_file(mut self, filename: String, content: String) -> Self {
+        self.add_file(filename, content);
         self
     }
 }
