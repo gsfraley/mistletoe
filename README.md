@@ -1,6 +1,6 @@
 ![Mistletoe logo](logo.jpg)
 
-# Mistletoe (WIP) - Next-Generation Kubernetes Package Manager With No Limits
+# Mistletoe (WIP) - Polyglot Kubernetes Package Manager
 
 **Mistletoe** is a Kubernetes package manager that goes about things in a different way than the rest of the ecosystem.  There are some great package managers already out there that we'll have to catch up to, notably Helm.  The best way to distinguish the two is to talk about what the packages themselves look like.
 
