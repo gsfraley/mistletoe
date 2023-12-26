@@ -693,6 +693,7 @@ dependencies = [
  "anyhow",
  "clap",
  "indexmap 2.1.0",
+ "indoc",
  "mistletoe-api",
  "serde",
  "serde_yaml",

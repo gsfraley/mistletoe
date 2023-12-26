@@ -1,5 +1,7 @@
-use std::path::Path;
+use std::path::PathBuf;
 
+use anyhow::anyhow;
+use indoc::formatdoc;
 use mistletoe_api::v0_1::{MistHuskPackage, MistHuskResult, deserialize_result};
 use wasmer::{
     Store,
@@ -11,15 +13,47 @@ use wasmer::{
 };
 
 pub struct MistHuskPackageModule {
+    local: bool,
     store: Store,
     instance: Instance,
     package: MistHuskPackage,
 }
 
 impl MistHuskPackageModule {
-    pub fn from_file(path: &Path) -> anyhow::Result<Self> {
-        let mut store = Store::default();
-        let module = Module::from_file(&store, path)?;
+    pub fn load(target: &str, allow_local: bool) -> anyhow::Result<Self> {
+        let mut inner_target = target;
+
+        if inner_target.starts_with("husk!") {
+            inner_target = &inner_target[5..];
+        }
+
+        if inner_target.starts_with("file:") {
+            inner_target = &inner_target[5..];
+
+            if !allow_local {
+                return Err(anyhow!(formatdoc!{"
+                    Engine is not permitted to load local module: {}
+
+                    This can happen if a remote reference to a package was run, and that package tries to
+                    load a local dependency.  Only local packages can load local packages.
+                ", target}));
+            }
+
+            let path = PathBuf::from(inner_target);
+            let store = Store::default();
+            let module = Module::from_file(&store, path)?;
+
+            return Ok(Self::init(true, store, module)?);
+        }
+
+        Err(anyhow!(formatdoc!{"
+            Couldn't parse package location: {}
+
+            If the package is a local file, please prefix the path with 'file:' or 'husk!file:'.
+        ", target}))
+    }
+
+    fn init(local: bool, mut store: Store, module: Module) -> anyhow::Result<Self> {
         let import_object = imports! {};
         let instance = Instance::new(&mut store, &module, &import_object)?;
         let memory = instance.exports.get_memory("memory")?;
@@ -27,10 +61,15 @@ impl MistHuskPackageModule {
         let package = Self::info_from_instance(&mut store, &instance, memory)?;
 
         Ok(Self {
+            local,
             store,
             instance,
             package,
         })
+    }
+
+    pub fn is_local(&self) -> bool {
+        self.local
     }
 
     fn info_from_instance(store: &mut Store, instance: &Instance, memory: &Memory)
