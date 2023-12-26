@@ -1,6 +1,6 @@
 ![Mistletoe logo](logo.jpg)
 
-# Mistletoe (WIP) - Next-Generation Kubernetes Package Manager With No Limits
+# Mistletoe (WIP) - Polyglot Kubernetes Package Manager
 
 **Mistletoe** is a Kubernetes package manager that goes about things in a different way than the rest of the ecosystem.  There are some great package managers already out there that we'll have to catch up to, notably Helm.  The best way to distinguish the two is to talk about what the packages themselves look like.
 
@@ -8,13 +8,13 @@
 
 [Helm](https://github.com/helm/helm) Charts are YAML templates in the Golang templating language.  It's very similar to writing Kubernetes resources themselves -- you write the resources, receiving input configuration from the engine that you can use in the template logic.
 
-**Mistletoe** modules are WebAssembly modules with one entrypoint.  The package developer writes a function in their language of choice that takes in a YAML input string and outputs Kubernetes resource YAML.  Essentially, the developer is welcome to do *anything* they want assuming it fits in the sandbox.
+**Mistletoe** packages are WebAssembly modules with one entrypoint.  The package developer writes a function in their language of choice that takes in a YAML input string and outputs Kubernetes resource YAML.  Essentially, the developer is welcome to do *anything* they want assuming it fits in the sandbox.
 
 ## What does it look like for developers?
 
 That depends on what the developer wants to do.  It turns out that pretty much any language that has a YAML parsing library works almost perfectly.  Ultimately, all we're doing is taking a string and returning a string.
 
-To give a more concrete example, here's a simple Rust snippet:
+To give a more concrete example, here's a simple Rust package:
 
 ```rust
 misthusk_headers! {"
