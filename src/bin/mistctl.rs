@@ -13,6 +13,8 @@ fn main() {
         .subcommand(
             Command::new("generate")
                 .about("Generate output YAML from a module")
+                .arg(arg!([name] "the name of the installation")
+                    .required(true))
                 .arg(arg!(-p --package <PACKAGE> "package to call")
                     .required(true))
                 .arg(arg!(-f --inputfile <FILE> "input file containing values to pass to the module")
@@ -53,6 +55,9 @@ fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     let mut input_mapping = serde_yaml::Mapping::new();
     input_file_yaml.into_iter().for_each(|(key, value)| { input_mapping.insert(key, value); });
     input_sets_yaml.into_iter().for_each(|(key, value)| { input_mapping.insert(key, value); });
+
+    let name = matches.get_one::<String>("name").ok_or(anyhow!("'name' must be provided"))?;
+    input_mapping.insert(serde_yaml::Value::String("name".to_string()), serde_yaml::Value::String(name.clone()));
 
     let output_mode = match matches.get_one::<String>("output").map(|o| o.as_str()) {
         None | Some("yaml") => OutputMode::Yaml,
