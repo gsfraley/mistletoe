@@ -98,7 +98,7 @@ mod tests {
 
     #[test]
     fn test_misthuskresult_ok() {
-        let expected_yaml = indoc!("
+        let expected_yaml = indoc!{"
             apiVersion: mistletoe.dev/v1alpha1
             kind: MistHuskResult
             data:
@@ -110,7 +110,7 @@ mod tests {
                   kind: Namespace
                   metadata:
                     name: my-namespace
-        ");
+        "};
 
         let misthuskoutput = MistHuskOutput::new()
             .with_message("warning: nothing went wrong".to_string())
@@ -126,5 +126,23 @@ mod tests {
 
         let misthuskresult_parsed = deserialize_result(&yaml).unwrap();
         assert_eq!(misthuskoutput, misthuskresult_parsed.unwrap());
+    }
+
+    #[test]
+    fn test_misthuskresult_err() {
+        let expected_yaml: &str = indoc!{"
+            apiVersion: mistletoe.dev/v1alpha1
+            kind: MistHuskResult
+            data:
+              result: Err
+              message: 'error: something went wrong'
+        "};
+
+        let err_string = "error: something went wrong";
+        let yaml = serialize_result(Err(anyhow!(err_string.to_string()))).unwrap();
+        assert_eq!(expected_yaml, yaml);
+
+        let misthuskresult_parsed = deserialize_result(&yaml).unwrap();
+        assert_eq!(err_string, misthuskresult_parsed.err().unwrap().to_string());
     }
 }

@@ -7,6 +7,6 @@ metadata:
     mistletoe.dev/group: mistletoe-examples
 spec:
   functions:
-    generate: mistletoe_generate
-    alloc: mistletoe_alloc
-    dealloc: mistletoe_dealloc
+    generate: __mistletoe_generate
+    alloc: __mistletoe_alloc
+    dealloc: __mistletoe_dealloc
