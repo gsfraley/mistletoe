@@ -692,6 +692,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "indexmap 2.1.0",
  "mistletoe-api",
  "serde",
  "serde_yaml",

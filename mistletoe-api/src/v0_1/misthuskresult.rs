@@ -15,8 +15,8 @@ pub fn serialize_result(result: MistHuskResult) -> Result<String, serde_yaml::Er
 }
 
 /// Deserialized the result from a YAML string.
-pub fn deserialize_result(result_str: &str) -> Result<MistHuskResult, serde_yaml::Error> {
-    Ok(serde_yaml::from_str::<MistHuskResultLayout>(result_str)?.into())
+pub fn deserialize_result(result_str: &str) -> MistHuskResult {
+    serde_yaml::from_str::<MistHuskResultLayout>(result_str)?.into()
 }
 
 /// This is the successful output of a module.
@@ -67,6 +67,11 @@ impl MistHuskOutput {
     pub fn with_file(mut self, filename: String, content: String) -> Self {
         self.add_file(filename, content);
         self
+    }
+
+    /// Retrieves the map of files stored by this object.
+    pub fn as_files(&self) -> &IndexMap<String, String> {
+        &self.files
     }
 }
 
@@ -158,7 +163,7 @@ mod tests {
         assert_eq!(expected_yaml, yaml);
 
         let misthuskresult_parsed = deserialize_result(&yaml).unwrap();
-        assert_eq!(misthuskoutput, misthuskresult_parsed.unwrap());
+        assert_eq!(misthuskoutput, misthuskresult_parsed);
     }
 
     #[test]
@@ -175,7 +180,7 @@ mod tests {
         let yaml = serialize_result(Err(anyhow!(err_string.to_string()))).unwrap();
         assert_eq!(expected_yaml, yaml);
 
-        let misthuskresult_parsed = deserialize_result(&yaml).unwrap();
+        let misthuskresult_parsed = deserialize_result(&yaml);
         assert_eq!(err_string, misthuskresult_parsed.err().unwrap().to_string());
     }
 }

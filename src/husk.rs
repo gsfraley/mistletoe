@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use mistletoe_api::v0_1::MistHuskPackage;
+use mistletoe_api::v0_1::{MistHuskPackage, MistHuskResult, deserialize_result};
 use wasmer::{
     Store,
     Module,
@@ -10,13 +10,13 @@ use wasmer::{
     imports,
 };
 
-pub struct MistHuskModule {
+pub struct MistHuskPackageModule {
     store: Store,
     instance: Instance,
     package: MistHuskPackage,
 }
 
-impl MistHuskModule {
+impl MistHuskPackageModule {
     pub fn from_file(path: &Path) -> anyhow::Result<Self> {
         let mut store = Store::default();
         let module = Module::from_file(&store, path)?;
@@ -24,8 +24,7 @@ impl MistHuskModule {
         let instance = Instance::new(&mut store, &module, &import_object)?;
         let memory = instance.exports.get_memory("memory")?;
 
-        let info = Self::info_from_instance(&mut store, &instance, memory)?;
-        let package: MistHuskPackage = serde_yaml::from_str(&info)?;
+        let package = Self::info_from_instance(&mut store, &instance, memory)?;
 
         Ok(Self {
             store,
@@ -35,7 +34,7 @@ impl MistHuskModule {
     }
 
     fn info_from_instance(store: &mut Store, instance: &Instance, memory: &Memory)
-        -> anyhow::Result<String>
+        -> anyhow::Result<MistHuskPackage>
     {
         let function_info: TypedFunction<(), i32>
             = instance.exports.get_typed_function(store, "__mistletoe_info")?;
@@ -48,7 +47,14 @@ impl MistHuskModule {
         let mut info_buf: Vec<u8> = vec![0; info_len.try_into()?];
 
         memory.view(store).read(info_ptr as u64, &mut info_buf[..])?;
-        Ok(String::from_utf8(info_buf)?)
+        let info = serde_yaml::from_str(&String::from_utf8(info_buf)?)?;
+
+        Ok(info)
+    }
+
+    pub fn info(&mut self) -> anyhow::Result<MistHuskPackage> {
+        let memory = (&self.instance.exports).get_memory("memory")?;
+        Self::info_from_instance(&mut self.store, &self.instance, memory)
     }
 
     fn alloc(&mut self, len: i32) -> anyhow::Result<i32> {
@@ -68,7 +74,7 @@ impl MistHuskModule {
         Ok(())
     }
 
-    pub fn generate(&mut self, input: &str) -> anyhow::Result<String> {
+    pub fn generate(&mut self, input: &str) -> MistHuskResult {
         let function_generate: TypedFunction<(i32, i32), i32>
             = self.instance.exports.get_typed_function(&mut self.store,
                 &self.package.function_generate.clone().unwrap_or("__mistletoe_generate".to_string()))?;
@@ -78,7 +84,9 @@ impl MistHuskModule {
         let output = self.read_string_from_memory(output_ptr)?;
 
         self.dealloc(input_ptr, input.len().try_into()?)?;
-        Ok(output)
+
+        let result = deserialize_result(&output)?;
+        Ok(result)
     }
 
     fn write_string_to_memory(&mut self, input: &str) -> anyhow::Result<i32> {

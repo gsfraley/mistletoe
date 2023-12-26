@@ -1,11 +1,13 @@
 use std::fs;
 use std::path::PathBuf;
 
-use clap::{Command, value_parser, arg};
-use mistletoe::husk::MistHuskModule;
+use anyhow::anyhow;
+use clap::{Command, ArgMatches, value_parser, arg};
+use mistletoe::{OutputMode, output_result};
+use mistletoe::husk::MistHuskPackageModule;
 use mistletoe_api::v0_1::MistHuskInput;
 
-fn main() -> Result<(), anyhow::Error> {
+fn main() {
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
         .about("Next-level Kubernetes package manager")
         .subcommand(
@@ -16,13 +18,25 @@ fn main() -> Result<(), anyhow::Error> {
                     .value_parser(value_parser!(PathBuf)))
                 .arg(arg!(-f --inputfile <FILE> "input file containing values to pass to the module")
                     .value_parser(value_parser!(PathBuf)))
-                .arg(arg!(-s --set <VALUES> "set values to pass to the module")),
+                .arg(arg!(-s --set <VALUES> "set values to pass to the module"))
+                .arg(arg!(-o --output <TYPE> "output type, can be 'yaml', 'raw', or 'dir=<dirpath>'"))
+                .arg(arg!(--debug "whether to give additional debug output if applicable")),
         )
         .get_matches();
 
+    if let Err(e) = run_command(&matches) {
+        if matches.get_one::<bool>("debug") == Some(&true) {
+            eprintln!("Error: {:?}", e);
+        } else {
+            eprintln!("Error: {}", e);
+        }
+    };
+}
+
+fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     if let Some(matches) = matches.subcommand_matches("generate") {
         let module_path = matches.get_one::<PathBuf>("module").unwrap();
-        let mut module = MistHuskModule::from_file(&module_path)?;
+        let mut module = MistHuskPackageModule::from_file(&module_path)?;
 
         let input_file_yaml = if let Some(input_file) = matches.get_one::<PathBuf>("inputfile") {
             let input_file_string = String::from_utf8(fs::read(input_file)?)?;
@@ -41,10 +55,17 @@ fn main() -> Result<(), anyhow::Error> {
         input_file_yaml.into_iter().for_each(|(key, value)| { input_mapping.insert(key, value); });
         input_sets_yaml.into_iter().for_each(|(key, value)| { input_mapping.insert(key, value); });
 
-        let input = serde_yaml::to_string(&MistHuskInput { data: input_mapping })?;
+        let output_mode = match matches.get_one::<String>("output").map(|o| o.as_str()) {
+            None | Some("yaml") => OutputMode::Yaml,
+            Some("raw") => OutputMode::Raw,
+            Some(o) => Err(anyhow!("Unexpected output type: {}", o))?,
+        };
 
-        println!("{}", module.generate(&input)?);
-    }
+        let input = serde_yaml::to_string(&MistHuskInput { data: input_mapping })?;
+        let result = module.generate(&input);
+        
+        output_result(result, output_mode)?;
+    };
 
     Ok(())
 }
