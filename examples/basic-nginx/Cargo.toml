@@ -1,5 +1,5 @@
 [package]
-name = "mistletoe-example-nginx"
+name = "mistletoe-example-basic-nginx"
 version = "0.1.0"
 edition = "2021"
 
@@ -8,11 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 indoc = "2.0"
+mistletoe-api = { path = "../../mistletoe-api" }
+mistletoe-bind = { path = "../../mistletoe-bind" }
 serde = { version = "1.0", features = ["derive"] }
 wasm-bindgen = "0.2"
-
-[dependencies.mistletoe-api]
-path = "../../mistletoe-api"
-
-[dependencies.mistletoe-bind]
-path = "../../mistletoe-bind"

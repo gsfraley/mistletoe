@@ -5,7 +5,7 @@ use indoc::formatdoc;
 use serde::Deserialize;
 
 misthusk_headers! {"
-  name: example-nginx
+  name: example-basic-nginx
   labels:
     mistletoe.dev/group: mistletoe-examples
 "}
