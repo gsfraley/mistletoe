@@ -14,7 +14,7 @@
 
 That depends on what the developer wants to do.  It turns out that pretty much any language that has a YAML parsing library works almost perfectly.  Ultimately, all we're doing is taking a string and returning a string.
 
-To give a more concrete example, here's a simple Rust snippet:
+To give a more concrete example, here's a simple Rust package:
 
 ```rust
 misthusk_headers! {"
