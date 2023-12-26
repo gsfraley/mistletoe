@@ -1,13 +1,47 @@
 use indexmap::IndexMap;
 use serde::{Serialize, Deserialize, Serializer, Deserializer};
 
+/// Info about the package the module returns when queried about.
+///
+/// This contains a name, some optional labels, as well as the exported names of
+/// a few significant functions.
 #[derive(Clone, PartialEq, Debug)]
 pub struct MistHuskPackage {
+    /// Name of the package.
     pub name: String,
+
+    /// Package labels.
+    /// 
+    /// These can be whatever the package maintainer decides to attach, though
+    /// there are some labels with significance that Mistletoe can use to provide
+    /// additional information about the module to the end-user, notably
+    /// `mistletoe.dev/group`.
     pub labels: Option<IndexMap<String, String>>,
 
+    /// The generate function/the main entrypoint to the module.
+    /// 
+    /// This is called with an input YAML string and then returns a Kubernetes
+    /// resource output YAML string.
+    /// 
+    /// The signature of this function is \[i32, i32] -> \[i32], where the provided
+    /// parameters are a (pointer to a buffer, length of buffer), and the returned
+    /// output is a pointer to another fat pointer, where the fat pointer starts with
+    /// 4 bytes of pointer to an output buffer, followed by 4 bytes of length of the buffer.
     pub function_generate: Option<String>,
+
+    /// The function inside the module used by the engine to allocate data into its
+    /// memory.
+    /// 
+    /// The signature of this function is \[i32] -> \[i32], where the provided parameter
+    /// is a length in bytes to allocate in the memory, and the returned parameter is
+    /// a pointer to the location in memory.
     pub function_alloc: Option<String>,
+
+    /// The function inside the module for the engine to use to clean up/deallocate
+    /// data in its memory.
+    /// 
+    /// The signature of this function is \[i32, i32], where the provided parameters are
+    /// (pointer to a buffer, length of buffer)
     pub function_dealloc: Option<String>,
 }
 

@@ -1,12 +1,12 @@
 ![Mistletoe logo](logo.jpg)
 
-# Mistletoe Package Manager (WIP)
+# Mistletoe (WIP) - Next-Generation Kubernetes Package Manager With No Limits
+
+**Mistletoe** is a Kubernetes package manager that goes about things in a different way than the rest of the ecosystem.  There are some great package managers already out there that we'll have to catch up to, notably Helm.  The best way to distinguish the two is to talk about what the packages themselves look like.
 
 ## Run WASM, Get Kubernetes YAML
 
-**Mistletoe** is a Kubernetes package manager that goes about things in a different way than the rest of the field.  There are some great package managers already out there that we'll have to catch up to, notably Helm.  The best way to distinguish the two is to talk about what the packages themselves look like in each ecosystem.
-
-Helm Charts are YAML templates in the Golang templating language.  It's very similar to writing Kubernetes resources themselves -- you write the resources, receiving input configuration from the engine that you can use in the template logic.
+[Helm](https://github.com/helm/helm) Charts are YAML templates in the Golang templating language.  It's very similar to writing Kubernetes resources themselves -- you write the resources, receiving input configuration from the engine that you can use in the template logic.
 
 **Mistletoe** modules are WebAssembly modules with one entrypoint.  The package developer writes a function in their language of choice that takes in a YAML input string and outputs Kubernetes resource YAML.  Essentially, the developer is welcome to do *anything* they want assuming it fits in the sandbox.
 
@@ -46,4 +46,4 @@ The above example takes a single-line input YAML, e.g. `name: my-namespace`, and
 
 ## Where are things at now?
 
-Right now, there's just a whoolleee lotta prototype code, nothing coherent.  But given how quickly its coming along, I don't expect it'll be long until there's something usable.  I'll be providing more updates, documentation, and write-ups on where I want this to go, but right now I'm only shopping for interest before I really start pouring some sweat into it.
+Right now, there's just a whole lotta prototype code, nothing coherent.  But given how quickly its coming along, I don't expect it'll be long until there's something usable.  I'll be providing more updates, documentation, and write-ups on where I want this to go, but right now I'm only shopping for interest before I really start pouring some sweat into it.

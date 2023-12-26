@@ -2,23 +2,37 @@ use anyhow::anyhow;
 use indexmap::IndexMap;
 use serde::{Serialize, Deserialize};
 
+/// This is the type that's returned from the module to the engine.
+/// 
+/// The error case can be any error (thanks to "anyhow"), and the success case is a
+/// [MistHuskOutput]. It can be serialized with [serialize_result] and deserialized with
+/// [deserialize_result] (this is because we don't own the [Result] type).
 pub type MistHuskResult = anyhow::Result<MistHuskOutput>;
 
+/// Serialized the result to a YAML string.
 pub fn serialize_result(result: MistHuskResult) -> Result<String, serde_yaml::Error> {
     serde_yaml::to_string(&MistHuskResultLayout::from(result))
 }
 
+/// Deserialized the result from a YAML string.
 pub fn deserialize_result(result_str: &str) -> Result<MistHuskResult, serde_yaml::Error> {
     Ok(serde_yaml::from_str::<MistHuskResultLayout>(result_str)?.into())
 }
 
+/// This is the successful output of a module.
 #[derive(Clone, PartialEq, Debug)]
 pub struct MistHuskOutput {
     message: Option<String>,
+
+    /// This is the map of output files.
+    /// 
+    /// Each key is a relative path in the output directory that the content will be
+    /// rendered to, and the keys are the content.
     files: IndexMap<String, String>,
 }
 
 impl MistHuskOutput {
+    /// Creates a new output object.
     pub fn new() -> Self {
         Self {
             message: None,
@@ -26,19 +40,30 @@ impl MistHuskOutput {
         }
     }
 
+    /// Sets the optional message in the output that the module can print out, in case
+    /// there's additional info the module wishes to provide to the end user.
     pub fn set_message(&mut self, message: String) {
         self.message = Some(message);
     }
 
+
+    /// Sets the optional message in the output that the module can print out, in case
+    /// there's additional info the module wishes to provide to the end user.
+    /// 
+    /// This is the same as `set_message` but can be used in chaining.
     pub fn with_message(mut self, message: String) -> Self {
         self.set_message(message);
         self
     }
 
+    /// Adds a file to the output that will be rendered to the output directory.
     pub fn add_file(&mut self, filename: String, content: String) {
         self.files.insert(filename, content);
     }
 
+    /// Adds a file to the output that will be rendered to the output directory.
+    /// 
+    /// This is the same as `add_file` but can be used in chaining.
     pub fn with_file(mut self, filename: String, content: String) -> Self {
         self.add_file(filename, content);
         self

@@ -1,6 +1,0 @@
----
-apiVersion: mistletoe.dev/v1alpha1
-kind: MistHuskInput
-data:
-  name: my-nginx
-  namespace: my-namespace
