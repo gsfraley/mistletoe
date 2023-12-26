@@ -62,21 +62,16 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
             }
         }
 
-        fn __mistletoe_generate_result(input_str: &str) -> mistletoe_bind::include::anyhow::Result<MistResult> {
-            let input: mistletoe_bind::api::v0_1::MistHuskInput = mistletoe_bind::include::serde_yaml::from_str(input_str)?;
-            Ok(generate(input.try_into_data()?))
+        fn __mistletoe_generate_result(input_str: &str) -> mistletoe_api::v0_1::MistHuskResult {
+            let input: mistletoe_api::v0_1::MistHuskInput = mistletoe_bind::include::serde_yaml::from_str(input_str)?;
+            generate(input.try_into_data()?)
         }
         
         #[wasm_bindgen::prelude::wasm_bindgen]
         pub fn __mistletoe_generate(ptr: *const u8, len: usize) -> *mut [usize; 2] {
             let input_str = unsafe { std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap() };
             let result = __mistletoe_generate_result(input_str);
-
-            let mistresult = result.unwrap_or_else(|e| {
-                MistResult::Err { message: format!("{:?}\n\n[input]\n{}", e, input_str) }
-            });
-
-            let mut output_str = std::mem::ManuallyDrop::new(mistletoe_bind::include::serde_yaml::to_string(&mistresult).unwrap());
+            let mut output_str = std::mem::ManuallyDrop::new(mistletoe_api::v0_1::serialize_result(result).unwrap());
             let retptr = Box::into_raw(Box::new([output_str.as_mut_ptr() as usize, output_str.len()]));
             retptr
         }

@@ -4,5 +4,5 @@ pub use misthuskinput::MistHuskInput;
 mod misthuskpackage;
 pub use misthuskpackage::MistHuskPackage;
 
-mod mistresult;
-pub use mistresult::{MistResult, MistResultFiles};
+mod misthuskresult;
+pub use misthuskresult::{MistHuskResult, MistHuskOutput, serialize_result, deserialize_result};

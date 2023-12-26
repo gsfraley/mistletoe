@@ -98,7 +98,6 @@ impl<'de> Deserialize<'de> for MistHuskPackage {
 mod tests {
     use super::*;
     use indoc::indoc;
-    use serde_yaml;
 
     #[test]
     fn test_misthuskpackage() {

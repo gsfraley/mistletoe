@@ -65,7 +65,6 @@ impl MistHuskInput {
 mod tests {
     use super::*;
     use indoc::indoc;
-    use serde_yaml;
 
     #[test]
     fn test_misthuskinput() {
