@@ -4,7 +4,7 @@ description = "Binding helper library for writing Mistletoe packages"
 readme = "README.md"
 repository = "https://github.com/gsfraley/mistletoe.git"
 license = "Apache-2.0"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2021"
 
 [dependencies]
@@ -14,8 +14,8 @@ serde_yaml = "0.9"
 
 [dependencies.mistletoe-api]
 path = "../mistletoe-api"
-version = "0.1.0"
+version = "0.1.1"
 
 [dependencies.mistletoe-macros]
 path = "../mistletoe-macros"
-version = "0.1.0"
+version = "0.1.1"

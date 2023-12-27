@@ -688,7 +688,7 @@ dependencies = [
 
 [[package]]
 name = "mistletoe"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -702,7 +702,7 @@ dependencies = [
 
 [[package]]
 name = "mistletoe-api"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "indexmap 2.1.0",
@@ -713,7 +713,7 @@ dependencies = [
 
 [[package]]
 name = "mistletoe-bind"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "anyhow",
  "mistletoe-api",
@@ -724,7 +724,7 @@ dependencies = [
 
 [[package]]
 name = "mistletoe-macros"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "indexmap 2.1.0",
  "indoc",
