@@ -69,8 +69,13 @@ impl MistHuskOutput {
         self
     }
 
+    /// Retrieves the attached message on this object.
+    pub fn get_message(&self) -> &Option<String> {
+        &self.message
+    }
+
     /// Retrieves the map of files stored by this object.
-    pub fn as_files(&self) -> &IndexMap<String, String> {
+    pub fn get_files(&self) -> &IndexMap<String, String> {
         &self.files
     }
 }

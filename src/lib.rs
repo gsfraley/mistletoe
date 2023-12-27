@@ -12,12 +12,18 @@ pub enum OutputMode {
 }
 
 pub fn output_result(result: MistHuskResult, mode: OutputMode) -> anyhow::Result<()> {
+    if let Ok(output) = &result {
+        if let Some(message) = output.get_message() {
+            println!("{}", message);
+        }
+    }
+
     match mode {
         OutputMode::Raw => Ok(println!("{}", serialize_result(result)?)),
 
         OutputMode::Yaml => match result {
             Ok(output) => {
-                output.as_files().values()
+                output.get_files().values()
                     .for_each(|content| println!("{}", content.trim()));
 
                 Ok(())
@@ -27,7 +33,7 @@ pub fn output_result(result: MistHuskResult, mode: OutputMode) -> anyhow::Result
 
         OutputMode::Dir(path) => match result {
             Ok(output) => {
-                for (filename, content) in output.as_files() {
+                for (filename, content) in output.get_files() {
                     let out_path = path.join(PathBuf::from(filename));
                     fs::write(out_path, content)?;
                 }
