@@ -2,6 +2,7 @@
 name = "mistletoe-api"
 description = "API objects and interfaces for the Mistletoe Package Manager"
 readme = "README.md"
+repository = "https://github.com/gsfraley/mistletoe.git"
 license = "Apache-2.0"
 version = "0.1.0"
 edition = "2021"
