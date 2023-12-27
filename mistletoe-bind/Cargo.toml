@@ -10,6 +10,8 @@ serde_yaml = "0.9"
 
 [dependencies.mistletoe-api]
 path = "../mistletoe-api"
+version = "0.1.0"
 
 [dependencies.mistletoe-macros]
 path = "../mistletoe-macros"
+version = "0.1.0"

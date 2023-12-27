@@ -17,6 +17,7 @@ wasmer = "4.2"
 
 [dependencies.mistletoe-api]
 path = "./mistletoe-api"
+version = "0.1.0"
 
 [workspace]
 members = [

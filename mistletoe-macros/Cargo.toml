@@ -16,3 +16,4 @@ unindent = "0.2"
 
 [dependencies.mistletoe-api]
 path = "../mistletoe-api"
+version = "0.1.0"
