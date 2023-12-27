@@ -49,7 +49,7 @@ pub fn generate(input_config: InputConfig) -> MistHuskResult {
     let output = MistHuskOutput::new()
         .with_file("namespace.yaml".to_string(), formatdoc!{"
             ---
-            apiVersion: apps/v1
+            apiVersion: v1
             kind: Namespace
             metadata:
               name: {0}
