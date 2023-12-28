@@ -16,7 +16,7 @@ pub struct InputConfig {
     namespace: String,
 }
 
-pub fn generate(input_config: InputConfig) -> MistHuskResult {
+fn generate(input_config: InputConfig) -> MistHuskResult {
     let output = MistHuskOutput::new()
         .with_file("deployment.yaml".to_string(), formatdoc!{"
             ---

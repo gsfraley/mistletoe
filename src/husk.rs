@@ -39,8 +39,8 @@ impl MistHuskPackageModule {
                 ", target}));
             }
 
-            let path = PathBuf::from(inner_target);
             let store = Store::default();
+            let path = PathBuf::from(inner_target);
             let module = Module::from_file(&store, path)?;
 
             return Ok(Self::init(true, store, module)?);
