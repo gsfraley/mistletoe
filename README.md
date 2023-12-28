@@ -2,6 +2,8 @@
 
 # Mistletoe (WIP) - the Polyglot Kubernetes Package Manager
 
+[Site](https://mistletoe.dev/) | [Book](https://mistletoe.dev/book/)
+
 **Mistletoe** is a Kubernetes package manager that goes about things in a different way than the rest of the
 ecosystem. It's built around a runtime where the packages are **WebAssembly** modules:
 
@@ -48,7 +50,6 @@ metadata:
 This is one of a nearly-unlimited number of ways to write a package.  ***All you need is a language with a
 YAML parser that can compile to WebAssembly.***
 
-# --------------
 # Roadmap
 
 **Mistletoe** is still very early on in the development lifecycle.  The above example works without issue, but
