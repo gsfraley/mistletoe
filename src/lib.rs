@@ -1,5 +1,4 @@
-pub mod husk;
-pub mod registry;
+pub mod instance;
 
 use std::fs;
 use std::path::PathBuf;

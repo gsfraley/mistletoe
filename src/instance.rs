@@ -12,14 +12,14 @@ use wasmer::{
     imports,
 };
 
-pub struct MistPackageModule {
+pub struct MistPackageInstance {
     local: bool,
     store: Store,
     instance: Instance,
     package: MistPackage,
 }
 
-impl MistPackageModule {
+impl MistPackageInstance {
     pub fn load(target: &str, allow_local: bool) -> anyhow::Result<Self> {
         let mut inner_target = target;
 

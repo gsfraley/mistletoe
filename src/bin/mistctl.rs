@@ -4,7 +4,7 @@ use std::path::PathBuf;
 use anyhow::anyhow;
 use clap::{Command, ArgMatches, value_parser, arg};
 use mistletoe::{OutputMode, output_result};
-use mistletoe::husk::MistPackageModule;
+use mistletoe::instance::MistPackageInstance;
 use mistletoe_api::v1alpha1::MistInput;
 
 fn main() {
@@ -67,7 +67,7 @@ fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     };
 
     let input = serde_yaml::to_string(&MistInput { data: input_mapping })?;
-    let mut module = MistPackageModule::load(&package, true)?;
+    let mut module = MistPackageInstance::load(&package, true)?;
     let result = module.generate(&input);
     
     output_result(result, output_mode)?;
