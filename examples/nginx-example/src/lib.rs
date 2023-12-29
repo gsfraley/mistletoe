@@ -45,8 +45,7 @@ fn generate(inputs: NginxExampleInputs) -> MistResult {
                     name: nginx
                     ports:
                     - name: http
-                      containerPort: 80
-        "})
+                      containerPort: 80"})
         .with_file("service.yaml".to_string(), formatdoc!{"
             ---
             apiVersion: v1
@@ -63,8 +62,7 @@ fn generate(inputs: NginxExampleInputs) -> MistResult {
               - name: http
                 port: 80
                 protocol: TCP
-                targetPort: http
-        "});
+                targetPort: http"});
 
     Ok(output)
 }

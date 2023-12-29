@@ -13,6 +13,7 @@ name = "mistctl"
 [dependencies]
 anyhow = "1.0"
 clap = "4.4"
+colored = "2.1"
 git2 = "0.18"
 indexmap = "2.1"
 indoc = "2.0"

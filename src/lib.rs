@@ -1,4 +1,6 @@
+pub mod config;
 pub mod instance;
+pub mod registry;
 
 use std::fs;
 use std::path::PathBuf;

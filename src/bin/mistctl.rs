@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 use anyhow::anyhow;
 use clap::{Command, ArgMatches, value_parser, arg};
+use colored::*;
 use mistletoe::{OutputMode, output_result};
 use mistletoe::instance::MistPackageInstance;
 use mistletoe_api::v1alpha1::MistInput;
@@ -28,9 +29,9 @@ fn main() {
     if let Some(matches) = matches.subcommand_matches("generate") {
         if let Err(e) = run_command(&matches) {
             if matches.get_flag("debug") {
-                eprintln!("Error: {:?}", e);
+                eprintln!("{} {:?}", "error:".red().bold(), e);
             } else {
-                eprintln!("Error: {}", e);
+                eprintln!("{} {}", "error:".red().bold(), e);
             }
         };
     }

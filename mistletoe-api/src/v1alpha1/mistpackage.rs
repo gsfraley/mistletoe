@@ -146,8 +146,7 @@ mod tests {
               functions:
                 generate: __mistletoe_generate
                 alloc: __mistletoe_alloc
-                dealloc: __mistletoe_dealloc
-        "};
+                dealloc: __mistletoe_dealloc"};
 
         let mut labels = IndexMap::new();
         labels.insert("mistletoe.dev/group".to_string(), "mistletoe-examples".to_string());

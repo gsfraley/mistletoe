@@ -152,8 +152,7 @@ mod tests {
                   apiVersion: v1
                   kind: Namespace
                   metadata:
-                    name: my-namespace
-        "};
+                    name: my-namespace"};
 
         let mistoutput = MistOutput::new()
             .with_message("warning: nothing went wrong".to_string())
@@ -161,8 +160,8 @@ mod tests {
                 apiVersion: v1
                 kind: Namespace
                 metadata:
-                  name: my-namespace
-            ").to_string());
+                  name: my-namespace")
+                .to_string());
 
         let yaml = serialize_result(Ok(mistoutput.clone())).unwrap();
         assert_eq!(expected_yaml, yaml);
@@ -178,8 +177,7 @@ mod tests {
             kind: MistResult
             data:
               result: Err
-              message: 'error: something went wrong'
-        "};
+              message: 'error: something went wrong'"};
 
         let err_string = "error: something went wrong";
         let yaml = serialize_result(Err(anyhow!(err_string.to_string()))).unwrap();

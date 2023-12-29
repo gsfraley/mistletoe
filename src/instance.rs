@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use indoc::formatdoc;
 use mistletoe_api::v1alpha1::{MistPackage, MistResult, deserialize_result};
 use wasmer::{
@@ -23,34 +23,32 @@ impl MistPackageInstance {
     pub fn load(target: &str, allow_local: bool) -> anyhow::Result<Self> {
         let mut inner_target = target;
 
-        if inner_target.starts_with("husk!") {
-            inner_target = &inner_target[5..];
-        }
-
-        if inner_target.starts_with("file:") {
-            inner_target = &inner_target[5..];
-
+        if inner_target.starts_with("./")
+            || inner_target.starts_with(&format!(".{}", std::path::MAIN_SEPARATOR_STR))
+        {
             if !allow_local {
                 return Err(anyhow!(formatdoc!{"
                     Engine is not permitted to load local module: {}
 
                     This can happen if a remote reference to a package was run, and that package tries to
-                    load a local dependency.  Only local packages can load local packages.
-                ", target}));
+                    load a local dependency.  Only local packages can load local packages.",
+                    target}));
             }
+
+            inner_target = &inner_target[2..];
 
             let store = Store::default();
             let path = PathBuf::from(inner_target);
-            let module = Module::from_file(&store, path)?;
+            let module = Module::from_file(&store, &path)
+                .with_context(|| format!("could not find the package at {:?}", &path))?;
 
             return Ok(Self::init(true, store, module)?);
         }
 
         Err(anyhow!(formatdoc!{"
             Couldn't parse package location: {}
-
-            If the package is a local file, please prefix the path with 'file:' or 'husk!file:'.
-        ", target}))
+            If the package is a local file, please prefix the path with '.{}'",
+            target, std::path::MAIN_SEPARATOR_STR}))
     }
 
     fn init(local: bool, mut store: Store, module: Module) -> anyhow::Result<Self> {

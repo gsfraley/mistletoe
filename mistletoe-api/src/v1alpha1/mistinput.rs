@@ -79,8 +79,7 @@ mod tests {
             kind: MistInput
             data:
               name: my-nginx
-              namespace: my-namespace
-        "};
+              namespace: my-namespace"};
 
         let mut data = serde_yaml::Mapping::new();
         data.insert("name".into(), "my-nginx".into());
