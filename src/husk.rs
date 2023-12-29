@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::anyhow;
 use indoc::formatdoc;
-use mistletoe_api::v0_1::{MistPackage, MistResult, deserialize_result};
+use mistletoe_api::v1alpha1::{MistPackage, MistResult, deserialize_result};
 use wasmer::{
     Store,
     Module,

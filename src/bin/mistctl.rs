@@ -5,7 +5,7 @@ use anyhow::anyhow;
 use clap::{Command, ArgMatches, value_parser, arg};
 use mistletoe::{OutputMode, output_result};
 use mistletoe::husk::MistPackageModule;
-use mistletoe_api::v0_1::MistInput;
+use mistletoe_api::v1alpha1::MistInput;
 
 fn main() {
     let matches = Command::new(env!("CARGO_CRATE_NAME"))

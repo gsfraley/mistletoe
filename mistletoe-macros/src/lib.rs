@@ -1,4 +1,4 @@
-use mistletoe_api::v0_1::MistPackage;
+use mistletoe_api::v1alpha1::MistPackage;
 
 use indexmap::IndexMap;
 use proc_macro::TokenStream;
@@ -62,8 +62,8 @@ pub fn mistletoe_headers(input: TokenStream) -> TokenStream {
             }
         }
 
-        fn __mistletoe_generate_result(input_str: &str) -> mistletoe_api::v0_1::MistResult {
-            let input: mistletoe_api::v0_1::MistInput = mistletoe_bind::include::serde_yaml::from_str(input_str)?;
+        fn __mistletoe_generate_result(input_str: &str) -> mistletoe_api::v1alpha1::MistResult {
+            let input: mistletoe_api::v1alpha1::MistInput = mistletoe_bind::include::serde_yaml::from_str(input_str)?;
             generate(input.try_into_data()?)
         }
         
@@ -71,7 +71,7 @@ pub fn mistletoe_headers(input: TokenStream) -> TokenStream {
         pub fn __mistletoe_generate(ptr: *const u8, len: usize) -> *mut [usize; 2] {
             let input_str = unsafe { std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap() };
             let result = __mistletoe_generate_result(input_str);
-            let mut output_str = std::mem::ManuallyDrop::new(mistletoe_api::v0_1::serialize_result(result).unwrap());
+            let mut output_str = std::mem::ManuallyDrop::new(mistletoe_api::v1alpha1::serialize_result(result).unwrap());
             let retptr = Box::into_raw(Box::new([output_str.as_mut_ptr() as usize, output_str.len()]));
             retptr
         }

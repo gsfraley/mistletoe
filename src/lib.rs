@@ -4,7 +4,7 @@ pub mod registry;
 use std::fs;
 use std::path::PathBuf;
 
-use mistletoe_api::v0_1::{MistResult, serialize_result};
+use mistletoe_api::v1alpha1::{MistResult, serialize_result};
 
 pub enum OutputMode {
     Raw,

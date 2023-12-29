@@ -89,4 +89,4 @@
 
 /// Module containing API objects for the 0.1 version of the mistletoe-api.
 /// The versions of the Kubernetes definitions are `mistletoe.dev/v1alpha1`.
-pub mod v0_1;
+pub mod v1alpha1;
