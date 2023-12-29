@@ -2,7 +2,7 @@
 
 # Mistletoe (WIP) - the Polyglot Kubernetes Package Manager
 
-[Site](https://mistletoe.dev/) | [Blog](https://mistletoe.dev/blog/) | [Book](https://mistletoe.dev/book/)
+[Site](https://mistletoe.dev/) | [Blog](https://mistletoe.dev/blog/ | [Book](https://mistletoe.dev/book/)
 
 **Mistletoe** is a Kubernetes package manager that goes about things in a different way than the rest of the
 ecosystem. It's built around a runtime where the packages are **WebAssembly** modules:
@@ -15,18 +15,20 @@ mistletoe_headers! {"
 "}
 
 #[derive(Deserialize)]
-struct InputConfig {
+struct NamespaceExampleInputs {
     name: String,
 }
 
-fn generate(input_config: InputConfig) -> MistResult {
+fn generate(inputs: NamespaceExampleInputs) -> MistResult {
+    let name = inputs.name;
+
     let output = MistOutput::new()
         .with_file("namespace.yaml".to_string(), formatdoc!{"
             apiVersion: v1
             kind: Namespace
             metadata:
-              name: {0}
-        ", input_config.name});
+              name: {name}
+        "});
 
     Ok(output)
 }
@@ -35,7 +37,7 @@ fn generate(input_config: InputConfig) -> MistResult {
 **The above is a simple package written in Rust.  If you run it with:**
 
 ```sh
-mistctl generate my-namespace -p ./namespace-example.wasm
+mistctl generate my-namespace -p ./namespace-example.mist-pack.wasm
 ```
 
 **You get the following YAML back:**

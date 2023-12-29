@@ -5,37 +5,40 @@ use indoc::formatdoc;
 use serde::Deserialize;
 
 mistletoe_headers! {"
-  name: example-basic-nginx
+  name: nginx-example
   labels:
     mistletoe.dev/group: mistletoe-examples
 "}
 
 #[derive(Deserialize)]
-pub struct InputConfig {
+pub struct NginxExampleInputs {
     name: String,
     namespace: String,
 }
 
-fn generate(input_config: InputConfig) -> MistResult {
+fn generate(inputs: NginxExampleInputs) -> MistResult {
+    let name = inputs.name;
+    let namespace = inputs.namespace;
+
     let output = MistOutput::new()
         .with_file("deployment.yaml".to_string(), formatdoc!{"
             ---
             apiVersion: apps/v1
             kind: Deployment
             metadata:
-              name: {0}
-              namespace: {1}
+              name: {name}
+              namespace: {namespace}
               labels:
-                app: {0}
+                app: {name}
             spec:
               replicas: 1
               selector:
                 matchLabels:
-                  app: {0}
+                  app: {name}
               template:
                 metadata:
                   labels:
-                    app: {0}
+                    app: {name}
                 spec:
                   containers:
                   - image: nginx
@@ -43,25 +46,25 @@ fn generate(input_config: InputConfig) -> MistResult {
                     ports:
                     - name: http
                       containerPort: 80
-        ", input_config.name, input_config.namespace})
+        "})
         .with_file("service.yaml".to_string(), formatdoc!{"
             ---
             apiVersion: v1
             kind: Service
             metadata:
-              name: {0}
-              namespace: {1}
+              name: {name}
+              namespace: {namespace}
               labels:
-                app: {0}
+                app: {name}
             spec:
               selector:
-                app: {0}
+                app: {name}
               ports:
               - name: http
                 port: 80
                 protocol: TCP
                 targetPort: http
-        ", input_config.name, input_config.namespace});
+        "});
 
     Ok(output)
 }
