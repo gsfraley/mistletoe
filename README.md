@@ -8,7 +8,7 @@
 ecosystem. It's built around a runtime where the packages are **WebAssembly** modules:
 
 ```rust
-misthusk_headers! {"
+mistletoe_headers! {"
   name: namespace-example
   labels:
     mistletoe.dev/group: mistletoe-examples
@@ -19,8 +19,8 @@ struct InputConfig {
     name: String,
 }
 
-fn generate(input_config: InputConfig) -> MistHuskResult {
-    let output = MistHuskOutput::new()
+fn generate(input_config: InputConfig) -> MistResult {
+    let output = MistOutput::new()
         .with_file("namespace.yaml".to_string(), formatdoc!{"
             apiVersion: v1
             kind: Namespace

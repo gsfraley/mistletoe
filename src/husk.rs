@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use anyhow::anyhow;
 use indoc::formatdoc;
-use mistletoe_api::v0_1::{MistHuskPackage, MistHuskResult, deserialize_result};
+use mistletoe_api::v0_1::{MistPackage, MistResult, deserialize_result};
 use wasmer::{
     Store,
     Module,
@@ -12,14 +12,14 @@ use wasmer::{
     imports,
 };
 
-pub struct MistHuskPackageModule {
+pub struct MistPackageModule {
     local: bool,
     store: Store,
     instance: Instance,
-    package: MistHuskPackage,
+    package: MistPackage,
 }
 
-impl MistHuskPackageModule {
+impl MistPackageModule {
     pub fn load(target: &str, allow_local: bool) -> anyhow::Result<Self> {
         let mut inner_target = target;
 
@@ -73,7 +73,7 @@ impl MistHuskPackageModule {
     }
 
     fn info_from_instance(store: &mut Store, instance: &Instance, memory: &Memory)
-        -> anyhow::Result<MistHuskPackage>
+        -> anyhow::Result<MistPackage>
     {
         let function_info: TypedFunction<(), i32>
             = instance.exports.get_typed_function(store, "__mistletoe_info")?;
@@ -91,7 +91,7 @@ impl MistHuskPackageModule {
         Ok(info)
     }
 
-    pub fn info(&mut self) -> anyhow::Result<MistHuskPackage> {
+    pub fn info(&mut self) -> anyhow::Result<MistPackage> {
         let memory = (&self.instance.exports).get_memory("memory")?;
         Self::info_from_instance(&mut self.store, &self.instance, memory)
     }
@@ -113,7 +113,7 @@ impl MistHuskPackageModule {
         Ok(())
     }
 
-    pub fn generate(&mut self, input: &str) -> MistHuskResult {
+    pub fn generate(&mut self, input: &str) -> MistResult {
         let function_generate: TypedFunction<(i32, i32), i32>
             = self.instance.exports.get_typed_function(&mut self.store,
                 &self.package.function_generate.clone().unwrap_or("__mistletoe_generate".to_string()))?;

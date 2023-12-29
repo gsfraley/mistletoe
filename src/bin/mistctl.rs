@@ -4,8 +4,8 @@ use std::path::PathBuf;
 use anyhow::anyhow;
 use clap::{Command, ArgMatches, value_parser, arg};
 use mistletoe::{OutputMode, output_result};
-use mistletoe::husk::MistHuskPackageModule;
-use mistletoe_api::v0_1::MistHuskInput;
+use mistletoe::husk::MistPackageModule;
+use mistletoe_api::v0_1::MistInput;
 
 fn main() {
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
@@ -66,8 +66,8 @@ fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
         Some(o) => Err(anyhow!("Unexpected output type: {}", o))?,
     };
 
-    let input = serde_yaml::to_string(&MistHuskInput { data: input_mapping })?;
-    let mut module = MistHuskPackageModule::load(&package, true)?;
+    let input = serde_yaml::to_string(&MistInput { data: input_mapping })?;
+    let mut module = MistPackageModule::load(&package, true)?;
     let result = module.generate(&input);
     
     output_result(result, output_mode)?;

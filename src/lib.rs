@@ -4,7 +4,7 @@ pub mod registry;
 use std::fs;
 use std::path::PathBuf;
 
-use mistletoe_api::v0_1::{MistHuskResult, serialize_result};
+use mistletoe_api::v0_1::{MistResult, serialize_result};
 
 pub enum OutputMode {
     Raw,
@@ -12,7 +12,7 @@ pub enum OutputMode {
     Dir(PathBuf),
 }
 
-pub fn output_result(result: MistHuskResult, mode: OutputMode) -> anyhow::Result<()> {
+pub fn output_result(result: MistResult, mode: OutputMode) -> anyhow::Result<()> {
     if let Ok(output) = &result {
         if let Some(message) = output.get_message() {
             println!("{}", message);

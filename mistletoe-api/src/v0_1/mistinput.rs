@@ -4,12 +4,12 @@ use serde::{Serialize, Deserialize, Serializer, Deserializer, de::DeserializeOwn
 /// There is only one field, and that is the freeform `data` field that can take
 /// any sort of map data the end-user wishes to provide to the module.
 #[derive(Clone, PartialEq, Debug)]
-pub struct MistHuskInput {
+pub struct MistInput {
     /// Freeform data field.
     pub data: serde_yaml::Mapping,
 }
 
-impl MistHuskInput {
+impl MistInput {
     /// Tries to cast the input into any [Deserialize] types, useful for passing
     /// the input into just about any type the package writer wishes to receive.
     pub fn try_into_data<'a, T>(&self) -> Result<T, serde_yaml::Error>
@@ -24,45 +24,45 @@ impl MistHuskInput {
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
-struct MistHuskInputLayout {
+struct MistInputLayout {
     apiVersion: String,
     kind: String,
     data: serde_yaml::Mapping,
 }
 
-impl From<MistHuskInput> for MistHuskInputLayout {
-    fn from(mhi: MistHuskInput) -> MistHuskInputLayout {
-        MistHuskInputLayout {
+impl From<MistInput> for MistInputLayout {
+    fn from(mhi: MistInput) -> MistInputLayout {
+        MistInputLayout {
             apiVersion: "mistletoe.dev/v1alpha1".to_string(),
-            kind: "MistHuskInput".to_string(),
+            kind: "MistInput".to_string(),
             data: mhi.data,
         }
     }
 }
 
-impl Into<MistHuskInput> for MistHuskInputLayout {
-    fn into(self) -> MistHuskInput {
-        MistHuskInput {
+impl Into<MistInput> for MistInputLayout {
+    fn into(self) -> MistInput {
+        MistInput {
             data: self.data,
         }
     }
 }
 
-impl Serialize for MistHuskInput {
+impl Serialize for MistInput {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer
     {
-        MistHuskInputLayout::from(self.clone()).serialize(serializer)
+        MistInputLayout::from(self.clone()).serialize(serializer)
     }
 }
 
-impl<'de> Deserialize<'de> for MistHuskInput {
+impl<'de> Deserialize<'de> for MistInput {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>
     {
-        let mri = MistHuskInputLayout::deserialize(deserializer)?;
+        let mri = MistInputLayout::deserialize(deserializer)?;
         Ok(mri.into())
     }
 }
@@ -73,10 +73,10 @@ mod tests {
     use indoc::indoc;
 
     #[test]
-    fn test_misthuskinput() {
+    fn test_mistinput() {
         let expected_yaml = indoc! {"
             apiVersion: mistletoe.dev/v1alpha1
-            kind: MistHuskInput
+            kind: MistInput
             data:
               name: my-nginx
               namespace: my-namespace
@@ -86,12 +86,12 @@ mod tests {
         data.insert("name".into(), "my-nginx".into());
         data.insert("namespace".into(), "my-namespace".into());
 
-        let misthuskinput = MistHuskInput { data };
+        let mistinput = MistInput { data };
 
-        let yaml = serde_yaml::to_string(&misthuskinput).unwrap();
+        let yaml = serde_yaml::to_string(&mistinput).unwrap();
         assert_eq!(expected_yaml, yaml);
 
-        let misthuskinput_parsed = serde_yaml::from_str(&yaml).unwrap();
-        assert_eq!(misthuskinput, misthuskinput_parsed);
+        let mistinput_parsed = serde_yaml::from_str(&yaml).unwrap();
+        assert_eq!(mistinput, mistinput_parsed);
     }
 }

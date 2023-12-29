@@ -1,4 +1,4 @@
-use mistletoe_api::v0_1::MistHuskPackage;
+use mistletoe_api::v0_1::MistPackage;
 
 use indexmap::IndexMap;
 use proc_macro::TokenStream;
@@ -8,19 +8,19 @@ use serde_yaml;
 use unindent::unindent;
 
 #[derive(Deserialize, Debug)]
-struct MistHuskHeaders {
+struct MistHeaders {
     name: String,
     #[serde(default)]
     labels: Option<IndexMap<String, String>>,
 }
 
 #[proc_macro]
-pub fn misthusk_headers(input: TokenStream) -> TokenStream {
+pub fn mistletoe_headers(input: TokenStream) -> TokenStream {
     let header_string_unfmt = input.into_iter().next().unwrap().to_string();
     let header_string = unindent(&header_string_unfmt[1..header_string_unfmt.len()-1]);
-    let headers: MistHuskHeaders = serde_yaml::from_str(&header_string).unwrap();
+    let headers: MistHeaders = serde_yaml::from_str(&header_string).unwrap();
 
-    let misthuskpackage = MistHuskPackage {
+    let mistpackage = MistPackage {
         name: headers.name,
         labels: headers.labels,
 
@@ -29,10 +29,10 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
         function_dealloc: Some("__mistletoe_dealloc".to_string()),
     };
 
-    let misthuskpackage_string = serde_yaml::to_string(&misthuskpackage).unwrap();
+    let mistpackage_string = serde_yaml::to_string(&mistpackage).unwrap();
 
     quote! {
-        const INFO: &'static str = #misthuskpackage_string;
+        const INFO: &'static str = #mistpackage_string;
         
         static INFO_PTR: mistletoe_bind::include::once_cell::sync::Lazy<std::sync::atomic::AtomicPtr<[usize; 2]>>
             = mistletoe_bind::include::once_cell::sync::Lazy::new(||
@@ -62,8 +62,8 @@ pub fn misthusk_headers(input: TokenStream) -> TokenStream {
             }
         }
 
-        fn __mistletoe_generate_result(input_str: &str) -> mistletoe_api::v0_1::MistHuskResult {
-            let input: mistletoe_api::v0_1::MistHuskInput = mistletoe_bind::include::serde_yaml::from_str(input_str)?;
+        fn __mistletoe_generate_result(input_str: &str) -> mistletoe_api::v0_1::MistResult {
+            let input: mistletoe_api::v0_1::MistInput = mistletoe_bind::include::serde_yaml::from_str(input_str)?;
             generate(input.try_into_data()?)
         }
         

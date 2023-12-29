@@ -1,10 +1,10 @@
-use mistletoe_api::v0_1::{MistHuskResult, MistHuskOutput};
-use mistletoe_bind::misthusk_headers;
+use mistletoe_api::v0_1::{MistResult, MistOutput};
+use mistletoe_bind::mistletoe_headers;
 
 use indoc::formatdoc;
 use serde::Deserialize;
 
-misthusk_headers! {"
+mistletoe_headers! {"
   name: example-basic-nginx
   labels:
     mistletoe.dev/group: mistletoe-examples
@@ -16,8 +16,8 @@ pub struct InputConfig {
     namespace: String,
 }
 
-fn generate(input_config: InputConfig) -> MistHuskResult {
-    let output = MistHuskOutput::new()
+fn generate(input_config: InputConfig) -> MistResult {
+    let output = MistOutput::new()
         .with_file("deployment.yaml".to_string(), formatdoc!{"
             ---
             apiVersion: apps/v1

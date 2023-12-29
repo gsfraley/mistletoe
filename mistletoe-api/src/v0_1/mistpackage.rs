@@ -6,7 +6,7 @@ use serde::{Serialize, Deserialize, Serializer, Deserializer};
 /// This contains a name, some optional labels, as well as the exported names of
 /// a few significant functions.
 #[derive(Clone, PartialEq, Debug)]
-pub struct MistHuskPackage {
+pub struct MistPackage {
     /// Name of the package.
     pub name: String,
 
@@ -47,27 +47,27 @@ pub struct MistHuskPackage {
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
-struct MistHuskPackageLayout {
+struct MistPackageLayout {
     apiVersion: String,
     kind: String,
-    metadata: MistHuskPackageLayoutMetadata,
-    spec: MistHuskPackageLayoutSpec,
+    metadata: MistPackageLayoutMetadata,
+    spec: MistPackageLayoutSpec,
 }
 
 #[derive(Serialize, Deserialize)]
-struct MistHuskPackageLayoutMetadata {
+struct MistPackageLayoutMetadata {
     name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     labels: Option<IndexMap<String, String>>,
 }
 
 #[derive(Serialize, Deserialize)]
-struct MistHuskPackageLayoutSpec {
-    functions: MistHuskPackageLayoutSpecFunctions,
+struct MistPackageLayoutSpec {
+    functions: MistPackageLayoutSpecFunctions,
 }
 
 #[derive(Serialize, Deserialize)]
-struct MistHuskPackageLayoutSpecFunctions {
+struct MistPackageLayoutSpecFunctions {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     generate: Option<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -76,17 +76,17 @@ struct MistHuskPackageLayoutSpecFunctions {
     dealloc: Option<String>,
 }
 
-impl From<MistHuskPackage> for MistHuskPackageLayout {
-    fn from(mhp: MistHuskPackage) -> MistHuskPackageLayout {
-        MistHuskPackageLayout {
+impl From<MistPackage> for MistPackageLayout {
+    fn from(mhp: MistPackage) -> MistPackageLayout {
+        MistPackageLayout {
             apiVersion: "mistletoe.dev/v1alpha1".to_string(),
-            kind: "MistHuskPackage".to_string(),
-            metadata: MistHuskPackageLayoutMetadata {
+            kind: "MistPackage".to_string(),
+            metadata: MistPackageLayoutMetadata {
                 name: mhp.name,
                 labels: mhp.labels,
             },
-            spec: MistHuskPackageLayoutSpec {
-                functions: MistHuskPackageLayoutSpecFunctions {
+            spec: MistPackageLayoutSpec {
+                functions: MistPackageLayoutSpecFunctions {
                     generate: mhp.function_generate,
                     alloc: mhp.function_alloc,
                     dealloc: mhp.function_dealloc,
@@ -96,9 +96,9 @@ impl From<MistHuskPackage> for MistHuskPackageLayout {
     }
 }
 
-impl Into<MistHuskPackage> for MistHuskPackageLayout {
-    fn into(self) -> MistHuskPackage {
-        MistHuskPackage {
+impl Into<MistPackage> for MistPackageLayout {
+    fn into(self) -> MistPackage {
+        MistPackage {
             name: self.metadata.name,
             labels: self.metadata.labels,
 
@@ -109,21 +109,21 @@ impl Into<MistHuskPackage> for MistHuskPackageLayout {
     }
 }
 
-impl Serialize for MistHuskPackage {
+impl Serialize for MistPackage {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer
     {
-        MistHuskPackageLayout::from(self.clone()).serialize(serializer)
+        MistPackageLayout::from(self.clone()).serialize(serializer)
     }
 }
 
-impl<'de> Deserialize<'de> for MistHuskPackage {
+impl<'de> Deserialize<'de> for MistPackage {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: Deserializer<'de>
     {
-        let mrl = MistHuskPackageLayout::deserialize(deserializer)?;
+        let mrl = MistPackageLayout::deserialize(deserializer)?;
         Ok(mrl.into())
     }
 }
@@ -134,10 +134,10 @@ mod tests {
     use indoc::indoc;
 
     #[test]
-    fn test_misthuskpackage() {
+    fn test_mistpackage() {
         let expected_yaml = indoc! {"
             apiVersion: mistletoe.dev/v1alpha1
-            kind: MistHuskPackage
+            kind: MistPackage
             metadata:
               name: example-nginx
               labels:
@@ -152,7 +152,7 @@ mod tests {
         let mut labels = IndexMap::new();
         labels.insert("mistletoe.dev/group".to_string(), "mistletoe-examples".to_string());
 
-        let misthuskpackage = MistHuskPackage {
+        let mistpackage = MistPackage {
             name: "example-nginx".to_string(),
             labels: Some(labels),
 
@@ -161,10 +161,10 @@ mod tests {
             function_dealloc: Some("__mistletoe_dealloc".to_string()),
         };
 
-        let yaml = serde_yaml::to_string(&misthuskpackage).unwrap();
+        let yaml = serde_yaml::to_string(&mistpackage).unwrap();
         assert_eq!(expected_yaml, yaml, "left:\n{expected_yaml}\nright:\n{expected_yaml}");
 
-        let misthuskpackage_parsed = serde_yaml::from_str(&yaml).unwrap();
-        assert_eq!(misthuskpackage, misthuskpackage_parsed);
+        let mistpackage_parsed = serde_yaml::from_str(&yaml).unwrap();
+        assert_eq!(mistpackage, mistpackage_parsed);
     }
 }

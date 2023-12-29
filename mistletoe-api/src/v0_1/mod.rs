@@ -1,8 +1,8 @@
-mod misthuskinput;
-pub use misthuskinput::MistHuskInput;
+mod mistinput;
+pub use mistinput::MistInput;
 
-mod misthuskpackage;
-pub use misthuskpackage::MistHuskPackage;
+mod mistpackage;
+pub use mistpackage::MistPackage;
 
-mod misthuskresult;
-pub use misthuskresult::{MistHuskResult, MistHuskOutput, serialize_result, deserialize_result};
+mod mistresult;
+pub use mistresult::{MistResult, MistOutput, serialize_result, deserialize_result};

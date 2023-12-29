@@ -5,23 +5,23 @@ use serde::{Serialize, Deserialize};
 /// This is the type that's returned from the module to the engine.
 /// 
 /// The error case can be any error (thanks to "anyhow"), and the success case is a
-/// [MistHuskOutput]. It can be serialized with [serialize_result] and deserialized with
+/// [MistOutput]. It can be serialized with [serialize_result] and deserialized with
 /// [deserialize_result] (this is because we don't own the [Result] type).
-pub type MistHuskResult = anyhow::Result<MistHuskOutput>;
+pub type MistResult = anyhow::Result<MistOutput>;
 
 /// Serialized the result to a YAML string.
-pub fn serialize_result(result: MistHuskResult) -> Result<String, serde_yaml::Error> {
-    serde_yaml::to_string(&MistHuskResultLayout::from(result))
+pub fn serialize_result(result: MistResult) -> Result<String, serde_yaml::Error> {
+    serde_yaml::to_string(&MistResultLayout::from(result))
 }
 
 /// Deserialized the result from a YAML string.
-pub fn deserialize_result(result_str: &str) -> MistHuskResult {
-    serde_yaml::from_str::<MistHuskResultLayout>(result_str)?.into()
+pub fn deserialize_result(result_str: &str) -> MistResult {
+    serde_yaml::from_str::<MistResultLayout>(result_str)?.into()
 }
 
 /// This is the successful output of a module.
 #[derive(Clone, PartialEq, Debug)]
-pub struct MistHuskOutput {
+pub struct MistOutput {
     message: Option<String>,
 
     /// This is the map of output files.
@@ -31,7 +31,7 @@ pub struct MistHuskOutput {
     files: IndexMap<String, String>,
 }
 
-impl MistHuskOutput {
+impl MistOutput {
     /// Creates a new output object.
     pub fn new() -> Self {
         Self {
@@ -82,14 +82,14 @@ impl MistHuskOutput {
 
 #[derive(Serialize, Deserialize)]
 #[allow(non_snake_case)]
-struct MistHuskResultLayout {
+struct MistResultLayout {
     apiVersion: String,
     kind: String,
-    data: MistHuskResultLayoutData,
+    data: MistResultLayoutData,
 }
 
 #[derive(Serialize, Deserialize)]
-struct MistHuskResultLayoutData {
+struct MistResultLayoutData {
     result: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     message: Option<String>,
@@ -97,18 +97,18 @@ struct MistHuskResultLayoutData {
     files: IndexMap<String, String>,
 }
 
-impl From<MistHuskResult> for MistHuskResultLayout {
-    fn from(result: MistHuskResult) -> Self {
+impl From<MistResult> for MistResultLayout {
+    fn from(result: MistResult) -> Self {
         Self {
             apiVersion: "mistletoe.dev/v1alpha1".to_string(),
-            kind: "MistHuskResult".to_string(),
+            kind: "MistResult".to_string(),
             data: match result {
-                Ok(output) => MistHuskResultLayoutData {
+                Ok(output) => MistResultLayoutData {
                     result: "Ok".to_string(),
                     message: output.message,
                     files: output.files,
                 },
-                Err(e) => MistHuskResultLayoutData {
+                Err(e) => MistResultLayoutData {
                     result: "Err".to_string(),
                     message: Some(e.to_string()),
                     files: IndexMap::new(),
@@ -118,18 +118,18 @@ impl From<MistHuskResult> for MistHuskResultLayout {
     }
 }
 
-impl Into<MistHuskResult> for MistHuskResultLayout {
-    fn into(self) -> MistHuskResult {
+impl Into<MistResult> for MistResultLayout {
+    fn into(self) -> MistResult {
         match self.data.result.as_str() {
-            "Ok" => MistHuskResult::Ok(MistHuskOutput {
+            "Ok" => MistResult::Ok(MistOutput {
                 message: self.data.message,
                 files: self.data.files,
             }),
-            "Err" => MistHuskResult::Err(match self.data.message {
+            "Err" => MistResult::Err(match self.data.message {
                 Some(message) => anyhow!(message),
                 None => anyhow!("module failed without a message"),
             }),
-            s => MistHuskResult::Err(anyhow!("module result format error: `data.result` must either be \"Ok\" or \"Err\", found {}", s)),
+            s => MistResult::Err(anyhow!("module result format error: `data.result` must either be \"Ok\" or \"Err\", found {}", s)),
         }
     }
 }
@@ -140,10 +140,10 @@ mod tests {
     use indoc::indoc;
 
     #[test]
-    fn test_misthuskresult_ok() {
+    fn test_mistresult_ok() {
         let expected_yaml = indoc!{"
             apiVersion: mistletoe.dev/v1alpha1
-            kind: MistHuskResult
+            kind: MistResult
             data:
               result: Ok
               message: 'warning: nothing went wrong'
@@ -155,7 +155,7 @@ mod tests {
                     name: my-namespace
         "};
 
-        let misthuskoutput = MistHuskOutput::new()
+        let mistoutput = MistOutput::new()
             .with_message("warning: nothing went wrong".to_string())
             .with_file("namespace.yaml".to_string(), indoc!("
                 apiVersion: v1
@@ -164,18 +164,18 @@ mod tests {
                   name: my-namespace
             ").to_string());
 
-        let yaml = serialize_result(Ok(misthuskoutput.clone())).unwrap();
+        let yaml = serialize_result(Ok(mistoutput.clone())).unwrap();
         assert_eq!(expected_yaml, yaml);
 
-        let misthuskresult_parsed = deserialize_result(&yaml).unwrap();
-        assert_eq!(misthuskoutput, misthuskresult_parsed);
+        let mistresult_parsed = deserialize_result(&yaml).unwrap();
+        assert_eq!(mistoutput, mistresult_parsed);
     }
 
     #[test]
-    fn test_misthuskresult_err() {
+    fn test_mistresult_err() {
         let expected_yaml: &str = indoc!{"
             apiVersion: mistletoe.dev/v1alpha1
-            kind: MistHuskResult
+            kind: MistResult
             data:
               result: Err
               message: 'error: something went wrong'
@@ -185,7 +185,7 @@ mod tests {
         let yaml = serialize_result(Err(anyhow!(err_string.to_string()))).unwrap();
         assert_eq!(expected_yaml, yaml);
 
-        let misthuskresult_parsed = deserialize_result(&yaml);
-        assert_eq!(err_string, misthuskresult_parsed.err().unwrap().to_string());
+        let mistresult_parsed = deserialize_result(&yaml);
+        assert_eq!(err_string, mistresult_parsed.err().unwrap().to_string());
     }
 }

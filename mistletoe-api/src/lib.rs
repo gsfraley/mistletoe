@@ -2,13 +2,13 @@
 //! and the modules.  They roughly follow the same pattern as Kubernetes resource definititions.
 //! Some examples of the output are provided below.
 //! 
-//! ## MistHuskInput
+//! ## MistInput
 //! 
 //! This is passed into the module as the main input it receives when generating output:
 //! 
 //! ```yaml
 //! apiVersion: mistletoe.dev/v1alpha1
-//! kind: MistHuskInput
+//! kind: MistInput
 //! data:
 //!   name: my-nginx
 //!   namespace: my-namespace
@@ -18,11 +18,11 @@
 //! considered roughly equivalent to Helm's values.  The objects provided by this package have
 //! methods to convert the `data` into any Deserialize objects the module has defined.
 //! 
-//! ## MistHuskPackage
+//! ## MistPackage
 //! 
 //! ```yaml
 //! apiVersion: mistletoe.dev/v1alpha1
-//! kind: MistHuskPackage
+//! kind: MistPackage
 //! metadata:
 //!   name: example-nginx
 //!   labels:
@@ -38,11 +38,11 @@
 //! usual metadata, notably the `name` and `labels`.  Some of the labels are used by
 //! **Mistletoe** itself when returning information about the package to the end user.
 //! 
-//! ## MistHuskResult
+//! ## MistResult
 //! 
 //! ```yaml
 //! apiVersion: mistletoe.dev/v1alpha1
-//! kind: MistHuskResult
+//! kind: MistResult
 //! data:
 //!   result: Ok
 //!   message: 'warning: nothing went wrong' # This line is optional
@@ -72,7 +72,7 @@
 //! 
 //! ```yaml
 //! apiVersion: mistletoe.dev/v1alpha1
-//! kind: MistHuskResult
+//! kind: MistResult
 //! data:
 //!   result: Err
 //!   message: 'error: something went wrong'
