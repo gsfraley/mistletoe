@@ -41,5 +41,5 @@ members = [
     "mistletoe-macros",
 ]
 exclude = [
-    "examples/nginx-example",
+    "examples/namespace-example",
 ]
