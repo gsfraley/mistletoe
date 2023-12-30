@@ -13,12 +13,10 @@ mistletoe_headers! {"
 #[derive(Deserialize)]
 pub struct Inputs {
     name: String,
-    namespace: String,
 }
 
 pub fn generate(inputs: Inputs) -> MistResult {
     let name = inputs.name;
-    let namespace = inputs.namespace;
 
     let output = MistOutput::new()
         .with_file("namespace.yaml".to_string(), formatdoc!("
