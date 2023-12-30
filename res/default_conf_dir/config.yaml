@@ -1,0 +1,6 @@
+apiVersion: mistletoe.dev/v1alpha1
+kind: MistletoeConfig
+spec:
+  registries:
+    mistletoe:
+      url: https://github.com/gsfraley/mistletoe-registry.git
