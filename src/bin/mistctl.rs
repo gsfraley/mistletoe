@@ -17,15 +17,19 @@ fn main() {
         .about("Next-level Kubernetes package manager")
         .subcommand(
             Command::new("generate")
-                .about("Generate output YAML from a module")
+                .about("Generate output YAML from a package")
                 .arg(arg!([name] "the name of the installation")
                     .required(true))
                 .arg(arg!(-p --package <PACKAGE> "package to call")
                     .required(true))
-                .arg(arg!(-f --inputfile <FILE> "input file containing values to pass to the module")
+                .arg(arg!(-f --inputfile <FILE> "input file containing values to pass to the package")
                     .value_parser(value_parser!(PathBuf)))
-                .arg(arg!(-s --set <VALUES> "set values to pass to the module"))
+                .arg(arg!(-s --set <VALUES> "set values to pass to the package"))
                 .arg(arg!(-o --output <TYPE> "output type, can be 'yaml', 'raw', or 'dir=<dirpath>'")),
+        )
+        .subcommand(
+            Command::new("inspect")
+                .about("Inspects the info exported by a package")
         )
         .get_matches();
 
@@ -67,8 +71,8 @@ fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     };
 
     let input = serde_yaml::to_string(&MistInput { data: input_mapping })?;
-    let mut module = MistPackageInstance::load(&package, true)?;
-    let result = module.generate(&input);
+    let mut instance = MistPackageInstance::load(&package, true)?;
+    let result = instance.generate(&input);
     
     output_result(result, output_mode)?;
 

@@ -2,7 +2,7 @@ use anyhow::anyhow;
 use indexmap::IndexMap;
 use serde::{Serialize, Deserialize};
 
-/// This is the type that's returned from the module to the engine.
+/// This is the type that's returned from the package to the engine.
 /// 
 /// The error case can be any error (thanks to "anyhow"), and the success case is a
 /// [MistOutput]. It can be serialized with [serialize_result] and deserialized with
@@ -19,7 +19,7 @@ pub fn deserialize_result(result_str: &str) -> MistResult {
     serde_yaml::from_str::<MistResultLayout>(result_str)?.into()
 }
 
-/// This is the successful output of a module.
+/// This is the successful output of a package.
 #[derive(Clone, PartialEq, Debug)]
 pub struct MistOutput {
     message: Option<String>,
@@ -40,15 +40,15 @@ impl MistOutput {
         }
     }
 
-    /// Sets the optional message in the output that the module can print out, in case
-    /// there's additional info the module wishes to provide to the end user.
+    /// Sets the optional message in the output that the package can print out, in case
+    /// there's additional info the package wishes to provide to the end user.
     pub fn set_message(&mut self, message: String) {
         self.message = Some(message);
     }
 
 
-    /// Sets the optional message in the output that the module can print out, in case
-    /// there's additional info the module wishes to provide to the end user.
+    /// Sets the optional message in the output that the package can print out, in case
+    /// there's additional info the package wishes to provide to the end user.
     /// 
     /// This is the same as `set_message` but can be used in chaining.
     pub fn with_message(mut self, message: String) -> Self {
@@ -81,9 +81,9 @@ impl MistOutput {
 }
 
 #[derive(Serialize, Deserialize)]
-#[allow(non_snake_case)]
+#[serde(rename_all = "camelCase")]
 struct MistResultLayout {
-    apiVersion: String,
+    api_version: String,
     kind: String,
     data: MistResultLayoutData,
 }
@@ -100,7 +100,7 @@ struct MistResultLayoutData {
 impl From<MistResult> for MistResultLayout {
     fn from(result: MistResult) -> Self {
         Self {
-            apiVersion: "mistletoe.dev/v1alpha1".to_string(),
+            api_version: "mistletoe.dev/v1alpha1".to_string(),
             kind: "MistResult".to_string(),
             data: match result {
                 Ok(output) => MistResultLayoutData {
@@ -127,9 +127,9 @@ impl Into<MistResult> for MistResultLayout {
             }),
             "Err" => MistResult::Err(match self.data.message {
                 Some(message) => anyhow!(message),
-                None => anyhow!("module failed without a message"),
+                None => anyhow!("package failed without a message"),
             }),
-            s => MistResult::Err(anyhow!("module result format error: `data.result` must either be \"Ok\" or \"Err\", found {}", s)),
+            s => MistResult::Err(anyhow!("package result format error: `data.result` must either be \"Ok\" or \"Err\", found {}", s)),
         }
     }
 }

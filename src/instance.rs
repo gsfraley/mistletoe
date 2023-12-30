@@ -18,7 +18,6 @@ pub struct MistPackageInstance {
     local: bool,
     store: Store,
     instance: Instance,
-    package: MistPackage,
 }
 
 impl MistPackageInstance {
@@ -28,13 +27,12 @@ impl MistPackageInstance {
                 "/",
                 ".",
                 std::path::MAIN_SEPARATOR_STR,
-                &format!(".{}", std::path::MAIN_SEPARATOR_STR)
             ]
             .iter().any(|p| target.starts_with(p))
         {    
             if !allow_local {
                 return Err(anyhow!(formatdoc!("
-                    engine is not permitted to load local module: {}
+                    engine is not permitted to load local package: {}
 
                     This can happen if a remote reference to a package was run, and that package tries to
                     load a local dependency.  Only local packages can load local packages.",
@@ -89,15 +87,11 @@ impl MistPackageInstance {
     fn init(local: bool, mut store: Store, module: Module) -> anyhow::Result<Self> {
         let import_object = imports! {};
         let instance = Instance::new(&mut store, &module, &import_object)?;
-        let memory = instance.exports.get_memory("memory")?;
-
-        let package = Self::info_from_instance(&mut store, &instance, memory)?;
 
         Ok(Self {
             local,
             store,
             instance,
-            package,
         })
     }
 
@@ -131,16 +125,14 @@ impl MistPackageInstance {
 
     fn alloc(&mut self, len: i32) -> anyhow::Result<i32> {
         let function_alloc: TypedFunction<i32, i32>
-            = self.instance.exports.get_typed_function(&mut self.store,
-                &self.package.function_alloc.clone().unwrap_or("__mistletoe_alloc".to_string()))?;
+            = self.instance.exports.get_typed_function(&mut self.store, "__mistletoe_alloc")?;
         
         Ok(function_alloc.call(&mut self.store, len)?)
     }
 
     fn dealloc(&mut self, ptr: i32, len: i32) -> anyhow::Result<()> {
         let function_dealloc: TypedFunction<(i32, i32), ()>
-            = self.instance.exports.get_typed_function(&mut self.store,
-                &self.package.function_dealloc.clone().unwrap_or("__mistletoe_dealloc".to_string()))?;
+            = self.instance.exports.get_typed_function(&mut self.store, "__mistletoe_dealloc")?;
         
         function_dealloc.call(&mut self.store, ptr, len)?;
         Ok(())
@@ -148,8 +140,7 @@ impl MistPackageInstance {
 
     pub fn generate(&mut self, input: &str) -> MistResult {
         let function_generate: TypedFunction<(i32, i32), i32>
-            = self.instance.exports.get_typed_function(&mut self.store,
-                &self.package.function_generate.clone().unwrap_or("__mistletoe_generate".to_string()))?;
+            = self.instance.exports.get_typed_function(&mut self.store, "__mistletoe_generate")?;
 
         let input_ptr = self.write_string_to_memory(input)?;
         let output_ptr = function_generate.call(&mut self.store, input_ptr, input.len().try_into()?)?;

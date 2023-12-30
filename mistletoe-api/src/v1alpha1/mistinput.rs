@@ -1,8 +1,8 @@
 use serde::{Serialize, Deserialize, Serializer, Deserializer, de::DeserializeOwned};
 
-/// This is the input that is passed from the engine to the module for processing.
+/// This is the input that is passed from the engine to the package for processing.
 /// There is only one field, and that is the freeform `data` field that can take
-/// any sort of map data the end-user wishes to provide to the module.
+/// any sort of map data the end-user wishes to provide to the package.
 #[derive(Clone, PartialEq, Debug)]
 pub struct MistInput {
     /// Freeform data field.
@@ -23,9 +23,9 @@ impl MistInput {
 }
 
 #[derive(Serialize, Deserialize)]
-#[allow(non_snake_case)]
+#[serde(rename_all = "camelCase")]
 struct MistInputLayout {
-    apiVersion: String,
+    api_version: String,
     kind: String,
     data: serde_yaml::Mapping,
 }
@@ -33,7 +33,7 @@ struct MistInputLayout {
 impl From<MistInput> for MistInputLayout {
     fn from(mhi: MistInput) -> MistInputLayout {
         MistInputLayout {
-            apiVersion: "mistletoe.dev/v1alpha1".to_string(),
+            api_version: "mistletoe.dev/v1alpha1".to_string(),
             kind: "MistInput".to_string(),
             data: mhi.data,
         }

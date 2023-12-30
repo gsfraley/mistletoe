@@ -23,10 +23,6 @@ pub fn mistletoe_headers(input: TokenStream) -> TokenStream {
     let mistpackage = MistPackage {
         name: headers.name,
         labels: headers.labels,
-
-        function_generate: Some("__mistletoe_generate".to_string()),
-        function_alloc: Some("__mistletoe_alloc".to_string()),
-        function_dealloc: Some("__mistletoe_dealloc".to_string()),
     };
 
     let mistpackage_string = serde_yaml::to_string(&mistpackage).unwrap();
