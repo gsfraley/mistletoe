@@ -57,7 +57,7 @@ impl MistOutput {
     }
 
     /// Adds a file to the output that will be rendered to the output directory.
-    pub fn add_file(&mut self, filename: String, content: String) {
+    pub fn set_file(&mut self, filename: String, content: String) {
         self.files.insert(filename, content);
     }
 
@@ -65,7 +65,7 @@ impl MistOutput {
     /// 
     /// This is the same as `add_file` but can be used in chaining.
     pub fn with_file(mut self, filename: String, content: String) -> Self {
-        self.add_file(filename, content);
+        self.set_file(filename, content);
         self
     }
 
