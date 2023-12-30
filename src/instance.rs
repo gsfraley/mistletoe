@@ -33,12 +33,12 @@ impl MistPackageInstance {
             .iter().any(|p| target.starts_with(p))
         {    
             if !allow_local {
-                return Err(anyhow!(formatdoc!{"
+                return Err(anyhow!(formatdoc!("
                     engine is not permitted to load local module: {}
 
                     This can happen if a remote reference to a package was run, and that package tries to
                     load a local dependency.  Only local packages can load local packages.",
-                    target}));
+                    target)));
             }
 
             let store = Store::default();
