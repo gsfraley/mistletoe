@@ -21,18 +21,13 @@ fn main() {
                 .arg(arg!(-f --inputfile <FILE> "input file containing values to pass to the module")
                     .value_parser(value_parser!(PathBuf)))
                 .arg(arg!(-s --set <VALUES> "set values to pass to the module"))
-                .arg(arg!(-o --output <TYPE> "output type, can be 'yaml', 'raw', or 'dir=<dirpath>'"))
-                .arg(arg!(--debug "whether to give additional debug output if applicable")),
+                .arg(arg!(-o --output <TYPE> "output type, can be 'yaml', 'raw', or 'dir=<dirpath>'")),
         )
         .get_matches();
 
     if let Some(matches) = matches.subcommand_matches("generate") {
         if let Err(e) = run_command(&matches) {
-            if matches.get_flag("debug") {
-                eprintln!("{} {:?}", "error:".red().bold(), e);
-            } else {
-                eprintln!("{} {}", "error:".red().bold(), e);
-            }
+            eprintln!("{} {}", "error:".red().bold(), e);
         };
     }
 }
