@@ -9,14 +9,14 @@ use windows::Win32::Storage::FileSystem::{
                         SetFileAttributesA};
 use windows::{Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES, core::PCSTR};
 
-static MIST_HOME_LOCATION: Lazy<PathBuf> = Lazy::new(||
+pub static MIST_HOME_LOCATION: Lazy<PathBuf> = Lazy::new(||
     std::env::var("MIST_HOME_LOCATION").map(PathBuf::from).unwrap_or_else(|_|
         home::home_dir().unwrap().join(PathBuf::from(".mistletoe"))));
 
 static MIST_CONFIG_LOCATION: Lazy<PathBuf> = Lazy::new(||
     MIST_HOME_LOCATION.join(PathBuf::from("config.yaml")));
 
-const MIST_CONFIG_DEFAULT_CONTENTS: &'static str = include_str!("../res/default_conf_dir/config.yaml");
+const MIST_CONFIG_DEFAULT_CONTENTS: &'static str = include_str!("../res/mist_home_dir/config.yaml");
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct MistletoeConfig {
@@ -31,7 +31,7 @@ pub struct MistletoeConfigSpec {
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct MistletoeRegistry {
-    pub url: String,
+    pub git: String,
 }
 
 impl MistletoeConfig {
@@ -43,7 +43,7 @@ impl MistletoeConfig {
         Self::from_str(&std::fs::read_to_string(path)?)
     }
 
-    pub fn from_home() -> anyhow::Result<MistletoeConfig> {
+    pub fn from_env() -> anyhow::Result<MistletoeConfig> {
         if !MIST_HOME_LOCATION.is_dir() {
             std::fs::create_dir(&*MIST_HOME_LOCATION)?;
 

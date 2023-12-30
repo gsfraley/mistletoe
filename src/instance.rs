@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Context};
 use indoc::formatdoc;
@@ -12,6 +12,8 @@ use wasmer::{
     imports,
 };
 
+use crate::registry::Registry;
+
 pub struct MistPackageInstance {
     local: bool,
     store: Store,
@@ -21,34 +23,67 @@ pub struct MistPackageInstance {
 
 impl MistPackageInstance {
     pub fn load(target: &str, allow_local: bool) -> anyhow::Result<Self> {
-        let mut inner_target = target;
-
-        if inner_target.starts_with("./")
-            || inner_target.starts_with(&format!(".{}", std::path::MAIN_SEPARATOR_STR))
-        {
+        if PathBuf::from(target).is_absolute() ||
+            [
+                "/",
+                ".",
+                std::path::MAIN_SEPARATOR_STR,
+                &format!(".{}", std::path::MAIN_SEPARATOR_STR)
+            ]
+            .iter().any(|p| target.starts_with(p))
+        {    
             if !allow_local {
                 return Err(anyhow!(formatdoc!{"
-                    Engine is not permitted to load local module: {}
+                    engine is not permitted to load local module: {}
 
                     This can happen if a remote reference to a package was run, and that package tries to
                     load a local dependency.  Only local packages can load local packages.",
                     target}));
             }
 
-            inner_target = &inner_target[2..];
-
             let store = Store::default();
-            let path = PathBuf::from(inner_target);
+            let path = PathBuf::from(&target[2..]);
             let module = Module::from_file(&store, &path)
                 .with_context(|| format!("could not find the package at {:?}", &path))?;
 
             return Ok(Self::init(true, store, module)?);
         }
 
-        Err(anyhow!(formatdoc!{"
-            Couldn't parse package location: {}
-            If the package is a local file, please prefix the path with '.{}'",
-            target, std::path::MAIN_SEPARATOR_STR}))
+        let target_parts: Vec<&str> = target.split(":").collect();
+        if target_parts.len() < 2 {
+            return Err(anyhow!("version must always be specified, in the form `<package>:<version>`"));
+        }
+        if target_parts.len() > 2 {
+            return Err(anyhow!("expected only one ':', found {}", target_parts.len()-1));
+        }
+
+        let target_path = Path::new(target_parts.get(0).unwrap());
+        let target_version = target_parts.get(1).unwrap();
+
+        let target_registry = target_path.iter().next().unwrap();
+        let target_package = target_path.iter()
+            .skip(1).map(|p| PathBuf::from(p)).reduce(|p1, p2| p1.join(p2))
+            .unwrap();
+
+        let registry = Registry::from_name(
+            target_registry.to_str().unwrap(),
+            &crate::config::MistletoeConfig::from_env()?);
+
+        if registry.is_none() {
+            return Err(anyhow!(
+                "could not find a registry saved with the name {}",
+                target_registry.to_str().unwrap()));
+        }
+
+        let registry = registry.unwrap();
+        registry.init()?;
+        registry.pull()?;
+
+        let package_path = registry
+            .lookup_package(&target_package, target_version)
+            .ok_or_else(|| anyhow!("could not find package at {}", target))?;
+
+        Ok(Self::load(package_path.to_str().unwrap(), allow_local)?)
     }
 
     fn init(local: bool, mut store: Store, module: Module) -> anyhow::Result<Self> {

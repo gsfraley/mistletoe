@@ -9,6 +9,10 @@ use mistletoe::instance::MistPackageInstance;
 use mistletoe_api::v1alpha1::MistInput;
 
 fn main() {
+    mistletoe::registry::Registry::from_name("mistletoe",
+        &mistletoe::config::MistletoeConfig::from_env().unwrap())
+        .unwrap().init().unwrap();
+
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
         .about("Next-level Kubernetes package manager")
         .subcommand(

@@ -3,4 +3,5 @@ kind: MistletoeConfig
 spec:
   registries:
     mistletoe:
-      url: https://github.com/gsfraley/mistletoe-registry.git
+      type: Git
+      git: https://github.com/gsfraley/mistletoe-registry.git
