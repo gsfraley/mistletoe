@@ -16,7 +16,7 @@ pub static MIST_HOME_LOCATION: Lazy<PathBuf> = Lazy::new(||
 static MIST_CONFIG_LOCATION: Lazy<PathBuf> = Lazy::new(||
     MIST_HOME_LOCATION.join(PathBuf::from("config.yaml")));
 
-const MIST_CONFIG_DEFAULT_CONTENTS: &'static str = include_str!("../res/mist_home_dir/config.yaml");
+const MIST_CONFIG_DEFAULT_CONTENTS: &'static str = include_str!("../res/default_config.yaml");
 
 #[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
 pub struct MistletoeConfig {
