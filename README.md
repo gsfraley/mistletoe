@@ -15,19 +15,20 @@ mistletoe_headers! {"
 "}
 
 #[derive(Deserialize)]
-struct NamespaceExampleInputs {
+pub struct Inputs {
     name: String,
 }
 
-fn generate(inputs: NamespaceExampleInputs) -> MistResult {
+pub fn generate(inputs: Inputs) -> MistResult {
     let name = inputs.name;
 
     let output = MistOutput::new()
-        .with_file("namespace.yaml".to_string(), formatdoc!{"
+        .with_file("namespace.yaml".to_string(), formatdoc!("
             apiVersion: v1
             kind: Namespace
             metadata:
-              name: {name}"});
+              name: {name}
+        "));
 
     Ok(output)
 }
@@ -36,7 +37,7 @@ fn generate(inputs: NamespaceExampleInputs) -> MistResult {
 **The above is a simple package written in Rust.  If you run it with:**
 
 ```sh
-mistctl generate my-namespace -p ./namespace-example.mist-pack.wasm
+mistctl generate my-namespace -p mistletoe/examples/namespace-example:0.1.1
 ```
 
 **You get the following YAML back:**
