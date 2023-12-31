@@ -15,7 +15,7 @@ struct MistHeaders {
 }
 
 #[proc_macro]
-pub fn mistletoe_headers(input: TokenStream) -> TokenStream {
+pub fn mistletoe_package(input: TokenStream) -> TokenStream {
     let header_string_unfmt = input.into_iter().next().unwrap().to_string();
     let header_string = unindent(&header_string_unfmt[1..header_string_unfmt.len()-1]);
     let headers: MistHeaders = serde_yaml::from_str(&header_string).unwrap();

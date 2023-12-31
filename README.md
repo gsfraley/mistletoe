@@ -8,7 +8,7 @@
 ecosystem. It's built around a runtime where the packages are **WebAssembly** modules:
 
 ```rust
-mistletoe_headers! {"
+mistletoe_package! {"
   name: namespace-example
   labels:
     mistletoe.dev/group: mistletoe-examples
