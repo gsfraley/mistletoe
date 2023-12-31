@@ -2,6 +2,21 @@
 //! and the packages.  They roughly follow the same pattern as Kubernetes resource definititions.
 //! Some examples of the output are provided below.
 //! 
+//! ## MistPackage
+//! 
+//! ```yaml
+//! apiVersion: mistletoe.dev/v1alpha1
+//! kind: MistPackage
+//! metadata:
+//!   name: nginx-examples
+//!   labels:
+//!     mistletoe.dev/group: mistletoe-examples
+//! ```
+//! 
+//! This is provided by the `info` method of the package getting called.  It contains some of the
+//! usual metadata, notably the `name` and `labels`.  Some of the labels are used by
+//! **Mistletoe** itself when returning information about the package to the end user.
+//! 
 //! ## MistInput
 //! 
 //! This is passed into the package as the main input it receives when generating output:
@@ -17,21 +32,6 @@
 //! The important part is the `data`, and the `data` is completely freeform.  This could be
 //! considered roughly equivalent to Helm's values.  The objects provided by this package have
 //! methods to convert the `data` into any Deserialize objects the package has defined.
-//! 
-//! ## MistPackage
-//! 
-//! ```yaml
-//! apiVersion: mistletoe.dev/v1alpha1
-//! kind: MistPackage
-//! metadata:
-//!   name: nginx-examples
-//!   labels:
-//!     mistletoe.dev/group: mistletoe-examples
-//! ```
-//! 
-//! This is provided by the `info` method of the package getting called.  It contains some of the
-//! usual metadata, notably the `name` and `labels`.  Some of the labels are used by
-//! **Mistletoe** itself when returning information about the package to the end user.
 //! 
 //! ## MistResult
 //! 
