@@ -54,22 +54,28 @@ YAML parser that can compile to WebAssembly.***
 
 # Roadmap
 
-**Mistletoe** is still very early on in the development lifecycle.  The above example works without issue, but
-there are a handful of things that need to be addressed before it could reasonably be opened up for use:
+**Mistletoe** is still very early on in the development lifecycle, but we've made some progress!
+
+As of note, we've implemented the **registry system** that's used by the above example -- you can add
+registries by Git URL and reference packages inside them by name now!
+
+There's also a default ***"mistletoe"*** registry added that points to
+[mistletoe-registry](https://github.com/gsfraley/mistletoe-registry). There's only the example package
+up now, but more will be coming soon!
+
+That said, there are still a handful of things that need to be addressed before it could reasonably be
+opened up for use:
 
 1. The `mistctl` utility currently only supports YAML generation -- it should be expanded to **support
 installation to clusters.**  This also implies all the usual goodies around lifecycle management, notably
 upgrades and uninstallation.
-2. The package manager is currently confined to packages that exist on the local filesystem.  We'll need to
-**attach a registry system** for users to pull and run packages by ref, not to mention some starting packages
-to demonstrate practical development and use.
-3. **Need documentation, documentation, and more documentation.**  The only way to guarantee adoption is to
+2. **Need documentation, documentation, and more documentation.**  The only way to guarantee adoption is to
 provide best-in-class documentation covering everything from general usage, to package development in
 multiple languages, to the nitty-gritty advanced information about the runtime for eager hackers.
 
 There's all that, as well as a number of less-important, but also-desired efforts worth evaluating:
 
-1. **Dependencies!**  We can get a lot more value by adding a way for packages to declare and call dependencies
+1. **Dynamic dependencies!**  We can get a lot more value by adding a way for packages to declare and call dependencies
 outside of whatever is compiled into the package.  This gets really useful when you consider #3 below.
 2. **Explicit support for other languages.**  While any WebAssembly-ready language will work, the project is
 written in Rust and provides Rust-first tooling.  For the next push, I'm looking to expand library support to
