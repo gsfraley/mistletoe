@@ -8,7 +8,7 @@
 //! apiVersion: mistletoe.dev/v1alpha1
 //! kind: MistPackage
 //! metadata:
-//!   name: nginx-examples
+//!   name: nginx-example
 //!   labels:
 //!     mistletoe.dev/group: mistletoe-examples
 //! ```
@@ -40,7 +40,7 @@
 //! kind: MistResult
 //! data:
 //!   result: Ok
-//!   message: 'warning: nothing went wrong' # This line is optional
+//!   message: 'nothing went wrong' # This line is optional
 //!   files:
 //!     namespace.yaml: |
 //!       apiVersion: v1
@@ -56,7 +56,7 @@
 //! kind: MistResult
 //! data:
 //!   result: Err
-//!   message: 'error: something went wrong'
+//!   message: 'something went wrong'
 //! ```
 //! 
 //! This is what the package returns to the engine, and contains the output of the package execution.
