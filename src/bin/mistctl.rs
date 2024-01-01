@@ -6,7 +6,7 @@ use mistletoe::command::*;
 
 fn main() {
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
-        .about("Next-level Kubernetes package manager")
+        .about("Polyglot Kubernetes package manager")
         .subcommand(
             Command::new("generate")
                 .about("Generate output YAML from a package")
