@@ -37,7 +37,7 @@ pub fn generate(inputs: Inputs) -> MistResult {
 **The above is a simple package written in Rust.  If you run it with:**
 
 ```sh
-mistctl generate my-namespace -p mistletoe/examples/namespace-example:0.1.1
+mistctl generate my-namespace -p mistletoe/examples/namespace-example:0.1.2
 ```
 
 **You get the following YAML back:**

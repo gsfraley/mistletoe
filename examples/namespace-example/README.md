@@ -3,7 +3,7 @@
 This is a super basic package that generates YAML for a Namespace based on the provided name of the installation:
 
 ```sh
-mistctl generate my-namespace -p mistletoe/examples/namespace-example:0.1.1
+mistctl generate my-namespace -p mistletoe/examples/namespace-example:0.1.2
 ```
 
 ```yaml
