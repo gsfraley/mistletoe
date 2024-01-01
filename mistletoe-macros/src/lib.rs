@@ -14,6 +14,40 @@ struct MistHeaders {
     labels: Option<IndexMap<String, String>>,
 }
 
+/// Generates "headers" for the engine to talk to the package.
+/// 
+/// This macro takes some package metadata, and outputs some package info as well as some functions to hook
+/// into the main entrypoint of your package.  It roughly takes the following:
+/// 
+/// ```rust
+/// mistletoe_package! {"
+///   name: namespace-example
+///   labels:
+///     mistletoe.dev/group: mistletoe-examples
+/// "}
+/// ```
+/// 
+/// It turns that into the following API object:
+/// 
+/// ```yaml
+/// apiVersion: mistletoe.dev/v1alpha1
+/// kind: MistPackage
+/// metadata:
+///   name: namespace-example
+///   labels:
+///     mistletoe.dev/group: mistletoe-examples
+/// ```
+/// 
+/// It also wraps a `pub fn generate` which you must provide.
+/// 
+/// It generates the following hooks for the outer runtime to call:
+/// 
+/// ```txt
+/// __mistletoe_info: [] -> [I32] // Returns the MistPackage API object
+/// __mistletoe_alloc: [I32] -> [I32] // Passthrough to rust allocator
+/// __mistletoe_dealloc: [I32, I32] -> [] // Passthrough to rust (de)allocator
+/// __mistletoe_generate: [I32, I32] -> [I32] // Wrapper around your pub generate function
+/// ```
 #[proc_macro]
 pub fn mistletoe_package(input: TokenStream) -> TokenStream {
     let header_string_unfmt = input.into_iter().next().unwrap().to_string();
