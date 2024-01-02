@@ -1,4 +1,4 @@
-use crate::instance::MistPackageInstance;
+use crate::loader;
 
 use std::fs;
 use std::path::PathBuf;
@@ -38,7 +38,8 @@ pub fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     };
 
     let input = serde_yaml::to_string(&MistInput { data: input_mapping })?;
-    let mut instance = MistPackageInstance::load(&package, true)?;
+    let package_ref = loader::PackageRef::from_str(&package)?;
+    let mut instance = loader::load(&package_ref)?;
     let result = instance.generate(&input);
     
     output_result(result, output_mode)?;
