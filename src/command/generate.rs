@@ -1,3 +1,4 @@
+use crate::installer::set_install_label;
 use crate::instance::{MistPackageInstance, MistPackageRef};
 
 use std::fs;
@@ -9,6 +10,7 @@ use mistletoe_api::v1alpha1::{MistInput, MistResult, serialize_result};
 
 pub fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     let package = matches.get_one::<String>("package").unwrap();
+    let process = matches.get_flag("process");
 
     let input_file_yaml = if let Some(input_file) = matches.get_one::<PathBuf>("inputfile") {
         let input_file_string = String::from_utf8(fs::read(input_file)?)?;
@@ -41,7 +43,7 @@ pub fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     let mut instance  = MistPackageInstance::load(&MistPackageRef::from_str(&package)?)?;
     let result = instance.generate(&input);
     
-    output_result(result, output_mode)?;
+    output_result(result, output_mode, name, process)?;
 
     Ok(())
 }
@@ -52,11 +54,16 @@ enum OutputMode {
     Dir(PathBuf),
 }
 
-fn output_result(result: MistResult, mode: OutputMode) -> anyhow::Result<()> {
+fn output_result(result: MistResult, mode: OutputMode, name: &str, process: bool) -> anyhow::Result<()> {
     if let Ok(output) = &result {
         if let Some(message) = output.get_message() {
             println!("{}", message);
         }
+    }
+
+    match (&mode, process) {
+        (&OutputMode::Raw, true) => return Err(anyhow!("cannot specify -r/--process flag with -o/--output raw")),
+        (_, _) => {}
     }
 
     match mode {
@@ -64,8 +71,13 @@ fn output_result(result: MistResult, mode: OutputMode) -> anyhow::Result<()> {
 
         OutputMode::Yaml => match result {
             Ok(output) => {
-                output.get_files().values()
-                    .for_each(|content| println!("{}", content.trim()));
+                for (_, content) in output.get_files() {
+                    if process {
+                        println!("{}", set_install_label(name, content)?.trim())
+                    } else {
+                        println!("{}", content.trim());
+                    }
+                }
 
                 Ok(())
             },
@@ -76,7 +88,12 @@ fn output_result(result: MistResult, mode: OutputMode) -> anyhow::Result<()> {
             Ok(output) => {
                 for (filename, content) in output.get_files() {
                     let out_path = path.join(PathBuf::from(filename));
-                    fs::write(out_path, content)?;
+                    if process {
+                        fs::write(out_path, set_install_label(name, content)?.trim())?;
+                    } else {
+                        fs::write(out_path, content.trim())?;
+
+                    }
                 }
 
                 Ok(())

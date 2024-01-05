@@ -17,7 +17,8 @@ fn main() {
                 .arg(arg!(-f --inputfile <FILE> "input file containing values to pass to the package")
                     .value_parser(value_parser!(PathBuf)))
                 .arg(arg!(-s --set <VALUES> "set values to pass to the package"))
-                .arg(arg!(-o --output <TYPE> "output type, can be 'yaml', 'raw', or 'dir=<dirpath>'")),
+                .arg(arg!(-o --output <TYPE> "output type, can be 'yaml', 'raw', or 'dir=<dirpath>'"))
+                .arg(arg!(-r --process "run the processing to set installation labels (will reformat the output YAML)")),
         )
         .subcommand(
             Command::new("inspect")
