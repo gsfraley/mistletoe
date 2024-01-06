@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="logo.png" alt="Mistletoe logo" width="60" height="60" />
+  <img src="logo.png" alt="Mistletoe logo" width="200" height="200" />
 </p>
 
 # Mistletoe (WIP) - the Polyglot Kubernetes Package Manager
