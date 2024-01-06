@@ -2,7 +2,7 @@
   <img src="logo.png" alt="Mistletoe logo" width="200" height="200" />
 </p>
 
-# Mistletoe (WIP) - the Polyglot Kubernetes Package Manager
+# Mistletoe (WIP) - *the Polyglot Kubernetes Package Manager*
 
 [Site](https://mistletoe.dev/) | [Blog](https://mistletoe.dev/blog/) | [Book](https://mistletoe.dev/book/)
 
