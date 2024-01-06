@@ -9,7 +9,6 @@ use clap::ArgMatches;
 use mistletoe_api::v1alpha1::MistInput;
 
 pub async fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
-    println!("Here!");
     let package = matches.get_one::<String>("package").unwrap();
 
     let input_file_yaml = if let Some(input_file) = matches.get_one::<PathBuf>("inputfile") {
@@ -34,9 +33,7 @@ pub async fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
 
     let input = serde_yaml::to_string(&MistInput { data: input_mapping })?;
     let mut instance  = MistPackageInstance::load(&MistPackageRef::from_str(&package)?)?;
-    let output = dbg!(instance.generate(&input)?);
-
-    println!("Also here!");
+    let output = instance.generate(&input)?;
 
     if let Some(message) = output.get_message() {
         println!("{}", message);

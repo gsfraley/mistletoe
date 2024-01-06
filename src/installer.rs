@@ -48,7 +48,6 @@ pub fn set_install_label(install_name: &str, input_yaml: &str) -> anyhow::Result
 }
 
 pub async fn install(processed_yaml: &str) -> anyhow::Result<()> {
-    println!("In install!");
     let client = Client::try_default().await?;
     let discover = Discovery::new(client.clone()).run().await?;
     let patch_params = PatchParams::apply("mistctl").force();
@@ -78,7 +77,6 @@ pub async fn install(processed_yaml: &str) -> anyhow::Result<()> {
         objs.push(obj_result?);
     }
 
-    println!("Bout to do stuff");
     for obj in objs {
         let gvk = if let Some(tm) = &obj.types {
             GroupVersionKind::try_from(tm)?
@@ -87,7 +85,6 @@ pub async fn install(processed_yaml: &str) -> anyhow::Result<()> {
         };
 
         if let Some((ar, ac)) = discover.resolve_gvk(&gvk) {
-            println!("Creating API");
             let api: Api<DynamicObject> = if ac.scope == Scope::Cluster {
                 Api::all_with(client.clone(), &ar)
             } else if let Some(namespace) = &obj.metadata.namespace {
@@ -96,7 +93,6 @@ pub async fn install(processed_yaml: &str) -> anyhow::Result<()> {
                 Api::default_namespaced_with(client.clone(), &ar)
             };
 
-            println!("Calling API");
             api.patch(
                 &obj.name_any(),
                 &patch_params,
