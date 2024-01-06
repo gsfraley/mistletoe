@@ -4,7 +4,7 @@ use kube::api::{PatchParams, Patch};
 use kube::core::{DynamicObject, GroupVersionKind};
 use kube::discovery::Scope;
 
-pub const INSTALL_LABEL_KEY: &'static str = "mistletoe.dev/tied-to";
+pub const INSTALL_LABEL_KEY: &'static str = "mistletoe.dev/tied-to-install";
 
 pub fn set_install_label(install_name: &str, input_yaml: &str) -> anyhow::Result<String> {
     let mut documents = Vec::new();
