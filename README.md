@@ -1,4 +1,6 @@
-![Mistletoe logo](logo.png)
+<p align="center">
+  <img src="logo.png" alt="Mistletoe logo" width="60" height="60" />
+</p>
 
 # Mistletoe (WIP) - the Polyglot Kubernetes Package Manager
 
