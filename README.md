@@ -34,19 +34,21 @@ pub fn generate(inputs: Inputs) -> MistResult {
 }
 ```
 
-**The above is a simple package written in Rust.  If you run it with:**
+**The above is a simple package written in Rust.  If you install it with:**
 
 ```sh
-mistctl generate my-namespace -p mistletoe/examples/namespace-example:0.1.2
+mistctl install my-namespace -p mistletoe/examples/namespace-example:0.1.2
 ```
 
-**You get the following YAML back:**
+**The following will be installed to your cluster:**
 
 ```yaml
 apiVersion: v1
 kind: Namespace
 metadata:
   name: my-namespace
+  labels:
+    mistletoe.dev/tied-to-install: my-namespace
 ```
 
 This is one of a nearly-unlimited number of ways to write a package.  ***All you need is a language with a
