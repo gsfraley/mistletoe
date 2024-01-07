@@ -37,6 +37,14 @@ async fn main() {
                 .about("Inspects the info exported by a package")
                 .arg(arg!([package] "the package to inspect"))
         )
+        .subcommand(
+            Command::new("registry")
+                .about("Manage the configured registries for Mistletoe")
+                .subcommand(
+                    Command::new("list")
+                        .about("Lists the configured registries")
+                )
+        )
         .get_matches();
 
     if let Err(e) = run_cli(&matches).await {
@@ -56,6 +64,12 @@ async fn run_cli(matches: &ArgMatches) -> anyhow::Result<()> {
 
     if let Some(matches) = matches.subcommand_matches("inspect") {
         inspect::run_command(&matches)?;
+    }
+
+    if let Some(matches) = matches.subcommand_matches("registry") {
+        if let Some(matches) = matches.subcommand_matches("list") {
+            registry_list::run_command(&matches)?;
+        }
     }
 
     Ok(())
