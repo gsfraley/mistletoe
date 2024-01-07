@@ -2,6 +2,12 @@ apiVersion: mistletoe.dev/v1alpha1
 kind: MistletoeConfig
 spec:
   registries:
-    mistletoe:
-      type: Git
-      git: https://github.com/gsfraley/mistletoe-registry.git
+  - name: mistletoe
+    defaultRemote: github-https
+    remotes:
+    - name: github-https
+      git:
+        url: https://github.com/gsfraley/mistletoe-registry.git
+    - name: github-ssh
+      git:
+        url: git@github.com:gsfraley/mistletoe-registry.git

@@ -1,5 +1,5 @@
-use crate::config::MistletoeConfig;
-use crate::registry::Registry;
+use crate::config::ConfigLayout;
+use crate::registry::Remote;
 
 use std::path::{Path, PathBuf};
 
@@ -79,21 +79,14 @@ impl MistPackageInstance {
                 Ok(MistPackageInstance::init(true, store, module)?)
             },
             MistPackageRef::Remote { registry, package, version } => {
-                let registry_instance = Registry::from_name(
+                let remote = Remote::default_for_name(
                     registry,
-                    &MistletoeConfig::from_env()?);
+                    &ConfigLayout::from_env()?)?;
 
-                if registry_instance.is_none() {
-                    return Err(anyhow!(
-                        "could not find a registry saved with the name {}",
-                        registry));
-                }
+                remote.init()?;
+                remote.pull()?;
 
-                let registry_instance = registry_instance.unwrap();
-                registry_instance.init()?;
-                registry_instance.pull()?;
-
-                let package_path = registry_instance
+                let package_path = remote
                     .lookup_package(&PathBuf::from(package), version)
                     .ok_or_else(|| anyhow!("could not find package at {}", package))?;
 

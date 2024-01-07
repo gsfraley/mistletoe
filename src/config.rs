@@ -1,49 +1,57 @@
-use std::collections::HashMap;
 use std::ffi::OsStr;
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf, Path};
 
 use once_cell::sync::Lazy;
-use serde::{Serialize, Deserialize};
-use windows::Win32::Storage::FileSystem::{
-                        GetFileAttributesA, 
-                        SetFileAttributesA};
-use windows::{Win32::Storage::FileSystem::FILE_FLAGS_AND_ATTRIBUTES, core::PCSTR};
+use serde::{Deserialize, Serialize};
+use windows::core::PCSTR;
+use windows::Win32::Storage::FileSystem::{GetFileAttributesA, SetFileAttributesA, FILE_FLAGS_AND_ATTRIBUTES};
 
 pub static MIST_HOME_LOCATION: Lazy<PathBuf> = Lazy::new(||
     std::env::var("MIST_HOME_LOCATION").map(PathBuf::from).unwrap_or_else(|_|
         home::home_dir().unwrap().join(PathBuf::from(".mistletoe"))));
 
-static MIST_CONFIG_LOCATION: Lazy<PathBuf> = Lazy::new(||
+pub static MIST_CONFIG_LOCATION: Lazy<PathBuf> = Lazy::new(||
     MIST_HOME_LOCATION.join(PathBuf::from("config.yaml")));
 
 const MIST_CONFIG_DEFAULT_CONTENTS: &'static str = include_str!("../res/default_config.yaml");
 
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub struct MistletoeConfig {
-    pub spec: MistletoeConfigSpec,
+const API_VERSION: &'static str = "mistletoe.dev/v1alpha1";
+const KIND: &'static str = "MistletoeConfig";
+
+// Serde's default attribute references values by function
+fn default_api_version() -> String { API_VERSION.to_string() }
+fn default_kind() -> String { KIND.to_string() }
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ConfigLayout {
+    #[serde(default = "default_api_version")]
+    api_version: String,
+    #[serde(default = "default_kind")]
+    kind: String,
+    pub spec: SpecLayout,
 }
 
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub struct MistletoeConfigSpec {
-    #[serde(default)]
-    pub registries: HashMap<String, MistletoeRegistry>,
-}
-
-#[derive(Clone, PartialEq, Debug, Serialize, Deserialize)]
-pub struct MistletoeRegistry {
-    pub git: String,
-}
-
-impl MistletoeConfig {
-    pub fn from_str(config: &str) -> anyhow::Result<MistletoeConfig> {
-        Ok(serde_yaml::from_str(config)?)
+impl ConfigLayout {
+    pub fn new() -> Self {
+        Self {
+            api_version: API_VERSION.to_string(),
+            kind: KIND.to_string(),
+            spec: SpecLayout {
+                registries: Vec::new(),
+            },
+        }
     }
 
-    pub fn from_file(path: &Path) -> anyhow::Result<MistletoeConfig> {
+    pub fn from_str(config_str: &str) -> anyhow::Result<Self> {
+        Ok(serde_yaml::from_str(config_str)?)
+    }
+
+    pub fn from_file(path: &Path) -> anyhow::Result<ConfigLayout> {
         Self::from_str(&std::fs::read_to_string(path)?)
     }
 
-    pub fn from_env() -> anyhow::Result<MistletoeConfig> {
+    pub fn from_env() -> anyhow::Result<Self> {
         if !MIST_HOME_LOCATION.is_dir() {
             std::fs::create_dir(&*MIST_HOME_LOCATION)?;
 
@@ -69,4 +77,75 @@ impl MistletoeConfig {
 
         Self::from_file(&*MIST_CONFIG_LOCATION)
     }
+}
+
+#[derive(Deserialize, Serialize)]
+pub struct SpecLayout {
+    pub registries: Vec<RegistryLayout>,
+}
+
+impl SpecLayout {
+    pub fn lookup_registry(&self, name: &str) -> Option<&RegistryLayout> {
+        self.registries.iter()
+            .filter(|registry| registry.name == name)
+            .next()
+    }
+
+    pub fn lookup_registry_mut(&mut self, name: &str) -> Option<&mut RegistryLayout> {
+        self.registries.iter_mut()
+            .filter(|registry| registry.name == name)
+            .next()
+    }
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RegistryLayout {
+    pub name: String,
+    pub default_remote: String,
+    pub remotes: Vec<RemoteLayout>,
+}
+
+impl RegistryLayout {
+    pub fn lookup_remote(&self, name: &str) -> Option<&RemoteLayout> {
+        self.remotes.iter()
+            .filter(|remote| remote.name() == name)
+            .next()
+    }
+
+    pub fn lookup_remote_mut(&mut self, name: &str) -> Option<&mut RemoteLayout> {
+        self.remotes.iter_mut()
+            .filter(|remote| remote.name() == name)
+            .next()
+    }
+
+    pub fn lookup_default_remote(&self) -> Option<&RemoteLayout> {
+        self.lookup_remote(&self.default_remote)
+    }
+
+    pub fn lookup_default_remote_mut(&mut self) -> Option<&mut RemoteLayout> {
+        self.lookup_remote_mut(&self.default_remote.clone())
+    }
+}
+
+#[derive(Clone, Deserialize, Serialize)]
+#[serde(untagged)]
+pub enum RemoteLayout {
+    Git {
+        name: String,
+        git: GitRemoteLayout,
+    },
+}
+
+impl RemoteLayout {
+    fn name(&self) -> &str {
+        match self {
+            RemoteLayout::Git { name, git: _ } => name,
+        }
+    }
+}
+
+#[derive(Clone, Serialize, Deserialize)]
+pub struct GitRemoteLayout {
+    pub url: String,
 }
