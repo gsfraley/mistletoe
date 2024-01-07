@@ -1,4 +1,4 @@
-use crate::installer::set_install_label;
+use crate::installation::InstallResources;
 use crate::instance::{MistPackageInstance, MistPackageRef};
 
 use std::fs;
@@ -73,7 +73,9 @@ fn output_result(result: MistResult, mode: OutputMode, name: &str, process: bool
             Ok(output) => {
                 for (_, content) in output.get_files() {
                     if process {
-                        println!("{}", set_install_label(name, content)?.trim())
+                        println!("{}", InstallResources::from_str(content)?
+                            .label_resources_with(name, 0)?
+                            .to_string()?)
                     } else {
                         println!("{}", content.trim());
                     }
@@ -89,7 +91,9 @@ fn output_result(result: MistResult, mode: OutputMode, name: &str, process: bool
                 for (filename, content) in output.get_files() {
                     let out_path = path.join(PathBuf::from(filename));
                     if process {
-                        fs::write(out_path, set_install_label(name, content)?.trim())?;
+                        fs::write(out_path, InstallResources::from_str(content)?
+                            .label_resources_with(name, 0)?
+                            .to_string()?)?;
                     } else {
                         fs::write(out_path, content.trim())?;
 
