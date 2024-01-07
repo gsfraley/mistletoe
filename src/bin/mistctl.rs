@@ -44,6 +44,12 @@ async fn main() {
                     Command::new("list")
                         .about("Lists the configured registries")
                 )
+                .subcommand(
+                    Command::new("remove")
+                        .about("Removes the given registry")
+                        .arg(arg!([name] "the name of the registry to remove")
+                            .required(true))
+                )
         )
         .get_matches();
 
@@ -69,6 +75,10 @@ async fn run_cli(matches: &ArgMatches) -> anyhow::Result<()> {
     if let Some(matches) = matches.subcommand_matches("registry") {
         if let Some(matches) = matches.subcommand_matches("list") {
             registry_list::run_command(&matches)?;
+        }
+
+        if let Some(matches) = matches.subcommand_matches("remove") {
+            registry_remove::run_command(&matches)?;
         }
     }
 

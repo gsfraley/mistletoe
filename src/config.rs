@@ -51,7 +51,7 @@ impl ConfigLayout {
         Self::from_str(&std::fs::read_to_string(path)?)
     }
 
-    pub fn from_env() -> anyhow::Result<Self> {
+    fn create_env() -> anyhow::Result<()> {
         if !MIST_HOME_LOCATION.is_dir() {
             std::fs::create_dir(&*MIST_HOME_LOCATION)?;
 
@@ -75,7 +75,23 @@ impl ConfigLayout {
             std::fs::write(&*MIST_CONFIG_LOCATION, MIST_CONFIG_DEFAULT_CONTENTS)?;
         }
 
+        Ok(())
+    }
+
+    pub fn from_env() -> anyhow::Result<Self> {
+        Self::create_env()?;
         Self::from_file(&*MIST_CONFIG_LOCATION)
+    }
+
+    pub fn write_to_file(&self, path: &Path) -> anyhow::Result<()> {
+        std::fs::write(path, serde_yaml::to_string(self)?)?;
+        Ok(())
+    }
+
+    pub fn write_to_env(&self) -> anyhow::Result<()> {
+        Self::create_env()?;
+        self.write_to_file(&*MIST_CONFIG_LOCATION)?;
+        Ok(())
     }
 }
 
@@ -98,7 +114,7 @@ impl SpecLayout {
     }
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RegistryLayout {
     pub name: String,
@@ -128,7 +144,7 @@ impl RegistryLayout {
     }
 }
 
-#[derive(Clone, Deserialize, Serialize)]
+#[derive(Clone, PartialEq, Deserialize, Serialize)]
 #[serde(untagged)]
 pub enum RemoteLayout {
     Git {
@@ -145,7 +161,7 @@ impl RemoteLayout {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Serialize, Deserialize)]
 pub struct GitRemoteLayout {
     pub url: String,
 }
