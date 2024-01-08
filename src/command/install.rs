@@ -1,4 +1,4 @@
-use crate::installer;
+use crate::installation::{InstallResources, InstallRef};
 use crate::instance::{MistPackageInstance, MistPackageRef};
 
 use std::fs;
@@ -40,8 +40,9 @@ pub async fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     }
 
     for (_, content) in output.get_files() {
-        let processed_yaml = installer::set_install_label(name, content)?;
-        installer::install(&processed_yaml).await?;
+        InstallRef { name: name.to_string(), version: 0}
+            .apply_resources(&InstallResources::from_str(content)?
+                .label_resources_with(name, 0)?).await?;
     }
     
     Ok(())

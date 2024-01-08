@@ -34,8 +34,19 @@ async fn main() {
         )
         .subcommand(
             Command::new("inspect")
-                .about("Inspects the info exported by a package")
-                .arg(arg!([package] "the package to inspect"))
+                .about("Inspects things around Mistletoe and the cluster")
+                .subcommand(
+                    Command::new("package")
+                        .about("Inspects the given package")
+                        .arg(arg!([package] "the package to inspect")
+                            .required(true))
+                )
+                .subcommand(
+                    Command::new("install")
+                        .about("Inspects the given cluster installation")
+                        .arg(arg!([name] "the name of the installation")
+                            .required(true))
+                )
         )
         .subcommand(
             Command::new("registry")
@@ -63,7 +74,6 @@ async fn main() {
     if let Err(e) = run_cli(&matches).await {
         eprintln!("{}{} {}", "error".bold().red(), ":".bold(), e.to_string());
     }
-
 }
 
 async fn run_cli(matches: &ArgMatches) -> anyhow::Result<()> {
@@ -76,7 +86,13 @@ async fn run_cli(matches: &ArgMatches) -> anyhow::Result<()> {
     }
 
     if let Some(matches) = matches.subcommand_matches("inspect") {
-        inspect::run_command(&matches)?;
+        if let Some(matches) = matches.subcommand_matches("package") {
+            inspect_package::run_command(&matches)?;
+        }
+
+        if let Some(matches) = matches.subcommand_matches("install") {
+            inspect_install::run_command(&matches).await?;
+        }
     }
 
     if let Some(matches) = matches.subcommand_matches("registry") {
