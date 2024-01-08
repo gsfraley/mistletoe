@@ -41,6 +41,13 @@ async fn main() {
             Command::new("registry")
                 .about("Manage the configured registries for Mistletoe")
                 .subcommand(
+                    Command::new("add")
+                        .about("Adds a new registry")
+                        .arg(arg!([name] "the name to give the registry")
+                            .required(true))
+                        .arg(arg!(-g --git <URL> "a git remote url"))
+                )
+                .subcommand(
                     Command::new("list")
                         .about("Lists the configured registries")
                 )
@@ -73,6 +80,10 @@ async fn run_cli(matches: &ArgMatches) -> anyhow::Result<()> {
     }
 
     if let Some(matches) = matches.subcommand_matches("registry") {
+        if let Some(matches) = matches.subcommand_matches("add") {
+            registry_add::run_command(matches)?;
+        }
+
         if let Some(matches) = matches.subcommand_matches("list") {
             registry_list::run_command(&matches)?;
         }

@@ -6,74 +6,73 @@ use anyhow::anyhow;
 use git2::Repository;
 
 pub struct Remote {
+    registry_name: String,
     layout: RemoteLayout,
 }
 
-impl From<RemoteLayout> for Remote {
-    fn from(layout: RemoteLayout) -> Self {
-        Self { layout }
-    }
-}
-
 impl Remote {
+    pub fn new(registry_name: String, layout: RemoteLayout) -> Self {
+        Self { registry_name, layout }
+    }
+
     pub fn default_for_name(name: &str, config: &ConfigLayout) -> anyhow::Result<Self> {
         let registry = config.spec.lookup_registry(name)
-            .ok_or(anyhow!("could not find registry for name \"{}\"", name))?;
+            .ok_or(anyhow!("could not find registry with the name \"{}\"", name))?;
         let remote = registry.lookup_default_remote()
             .ok_or(anyhow!("registry \"{}\" did not have a remote by the default name \"{}\"", name, registry.default_remote))?;
 
-        Ok(remote.clone().into())
+            
+        Ok(Self::new(registry.name.clone(), remote.clone()))
     }
 
     pub fn init(&self) -> anyhow::Result<()> {
         match &self.layout {
-            RemoteLayout::Git { name, git }
-                => GitRemote { name: name.to_string(), url: git.url.clone() }.init(),
+            RemoteLayout::Git { name: _, git }
+                => GitRemote { url: git.url.clone() }.init(&self.registry_name),
         }
     }
 
     pub fn pull(&self) -> anyhow::Result<()> {
         match &self.layout {
-            RemoteLayout::Git { name, git }
-                => GitRemote { name: name.to_string(), url: git.url.clone() }.pull(),
+            RemoteLayout::Git { name: _, git }
+                => GitRemote { url: git.url.clone() }.pull(&self.registry_name),
         }
     }
 
     pub fn lookup_package(&self, package: &Path, version: &str) -> Option<PathBuf> {
         match &self.layout {
-            RemoteLayout::Git { name, git }
-                => GitRemote { name: name.to_string(), url: git.url.clone() }.lookup_package(package, version),
+            RemoteLayout::Git { name: _, git }
+                => GitRemote { url: git.url.clone() }.lookup_package(&self.registry_name, package, version),
         }
     }
 }
 
 struct GitRemote {
-    name: String,
     url: String,
 }
 
 impl GitRemote {
-    fn get_local_registry_path(&self) -> PathBuf {
+    fn get_local_registry_path(&self, registry_name: &str) -> PathBuf {
         MIST_HOME_LOCATION
             .join(Path::new("registries"))
-            .join(Path::new(&self.name))
+            .join(Path::new(registry_name))
     }
     
-    fn init(&self) -> anyhow::Result<()> {
-        let initted = self.get_local_registry_path()
+    fn init(&self, registry_name: &str) -> anyhow::Result<()> {
+        let initted = self.get_local_registry_path(registry_name)
             .join(Path::new(".git"))
             .exists();
 
         if !initted {
-            std::fs::create_dir_all(self.get_local_registry_path())?;
-            Repository::clone(&self.url, self.get_local_registry_path())?;
+            std::fs::create_dir_all(self.get_local_registry_path(registry_name))?;
+            Repository::clone(&self.url, self.get_local_registry_path(registry_name))?;
         }
 
         Ok(())
     }
 
-    fn pull(&self) -> anyhow::Result<()> {
-        let repository = Repository::open(self.get_local_registry_path())?;
+    fn pull(&self, registry_name: &str) -> anyhow::Result<()> {
+        let repository = Repository::open(self.get_local_registry_path(registry_name))?;
         let head = repository.head()?.shorthand().unwrap().to_string();
 
         repository.find_remote("origin")?
@@ -88,8 +87,8 @@ impl GitRemote {
         Ok(())
     }
 
-    fn lookup_package(&self, package: &Path, version: &str) -> Option<PathBuf> {
-        let package_path = self.get_local_registry_path()
+    fn lookup_package(&self, registry_name: &str, package: &Path, version: &str) -> Option<PathBuf> {
+        let package_path = self.get_local_registry_path(registry_name)
             .join(&package)
             .join(format!("{}-{}.mist-pack.wasm",
                 package.file_name().unwrap().to_str().unwrap(), version));
