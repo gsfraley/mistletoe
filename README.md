@@ -59,8 +59,6 @@ This is one of a nearly-unlimited number of ways to write a package.  ***All you
 
 **Mistletoe** is still very early on in the development lifecycle, but we're moving quickly!
 
-## Recent progress
-
 1. The ability to **install to** clusters has landed!  (And we'll even throw in the ability to uninstall from clusters for free!)
 
 2. We've implemented the **registry system** that's used by the above example -- you can add registries by Git URL and reference packages inside them by name now!  There's also a default ***"mistletoe"*** registry added that points to [mistletoe-registry](https://github.com/gsfraley/mistletoe-registry). There's only the example package up now, but more will be coming soon!
