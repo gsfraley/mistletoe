@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use anyhow::anyhow;
 use k8s_openapi::api::core::v1::Namespace;
 use kube::{Client, Discovery, Api, ResourceExt};
-use kube::api::{ListParams, PatchParams, Patch};
+use kube::api::{ListParams, PatchParams, Patch, DeleteParams};
 use kube::core::{DynamicObject, GroupVersionKind};
 use kube::discovery::{ApiResource, ApiCapabilities, Scope};
 use serde_yaml::Mapping;
@@ -13,11 +13,11 @@ pub const TIED_TO_INSTALL_VERSION_KEY: &'static str = "mistletoe.dev/tied-to-ins
 
 pub struct InstallRef {
     pub name: String,
-    pub version: u32,
+    pub version: Option<u32>,
 }
 
 impl InstallRef {
-    pub async fn get_resources(&self, filter_version: bool) -> anyhow::Result<Vec<DynamicObject>> {
+    pub async fn get_resources(&self) -> anyhow::Result<Vec<DynamicObject>> {
         let client = Client::try_default().await?;
         let discovery = Discovery::new(client.clone()).run().await?;
 
@@ -30,8 +30,8 @@ impl InstallRef {
             .collect();
 
         let mut label_selector = format!("{}={}", TIED_TO_INSTALL_NAME_KEY, self.name);
-        if filter_version {
-            label_selector += &format!(",{}=v{}", TIED_TO_INSTALL_VERSION_KEY, self.version);
+        if let Some(version) = self.version {
+            label_selector += &format!(",{}=v{}", TIED_TO_INSTALL_VERSION_KEY, version);
         }
 
         let label_list_params = ListParams::default().labels(&label_selector);
@@ -48,8 +48,10 @@ impl InstallRef {
                 // TODO: This and the equivalent block in the other case are awful -- we're actively ignoring
                 // list-method results that don't conform, but this could potentially result in us not finding
                 // resources.  We should properly analyze the API or break apart error cases to ensure robustness.
-                if let Ok(mut object_list) = api.list(&label_list_params).await {
-                    resources.append(&mut object_list.items);
+                if let Ok(object_list) = api.list(&label_list_params).await {
+                    for item in object_list.items {
+                        resources.push(api.get(&item.name_any()).await?);
+                    }
                 }
             } else {
                 for namespace in &namespaces {
@@ -58,8 +60,10 @@ impl InstallRef {
                         namespace.metadata.name.as_ref().unwrap(),
                         &resource_type);
 
-                    if let Ok(mut object_list) = api.list(&label_list_params).await {
-                        resources.append(&mut object_list.items);
+                    if let Ok(object_list) = api.list(&label_list_params).await {
+                        for item in object_list.items {
+                            resources.push(api.get(&item.name_any()).await?);
+                        }
                     }
                 }
             }
@@ -70,17 +74,17 @@ impl InstallRef {
 
     pub async fn apply_resources(&self, install_resources: &InstallResources) -> anyhow::Result<()> {
         let client = Client::try_default().await?;
-        let discover = Discovery::new(client.clone()).run().await?;
+        let discovery = Discovery::new(client.clone()).run().await?;
         let patch_params = PatchParams::apply("mistctl").force();
 
         for obj in &install_resources.resources {
             let gvk = if let Some(tm) = &obj.types {
                 GroupVersionKind::try_from(tm)?
             } else {
-                return Err(anyhow!("could not determine TypeMeta for {:?}", serde_yaml::to_string(&obj)))
+                return Err(anyhow!("could not determine TypeMeta for {:?}", serde_yaml::to_string(&obj)));
             };
 
-            if let Some((ar, ac)) = discover.resolve_gvk(&gvk) {
+            if let Some((ar, ac)) = discovery.resolve_gvk(&gvk) {
                 let api: Api<DynamicObject> = if ac.scope == Scope::Cluster {
                     Api::all_with(client.clone(), &ar)
                 } else if let Some(namespace) = &obj.metadata.namespace {
@@ -101,7 +105,38 @@ impl InstallRef {
     }
 
     pub async fn delete_resources(&self) -> anyhow::Result<()> {
-        todo!();
+        let resources = self.get_resources().await?;
+
+        let client = Client::try_default().await?;
+        let discovery = Discovery::new(client.clone()).run().await?;
+        let delete_params = DeleteParams::foreground();
+
+        for resource in resources {
+            let gvk = if let Some(tm) = &resource.types {
+                GroupVersionKind::try_from(tm)?
+            } else {
+                // TODO: This is a bit of a hack, but some returned resources don't have types, and
+                // we can't do anything about them -- probably worth investigating how they get here.
+                continue;
+            };
+
+            if let Some((ar, ac)) = discovery.resolve_gvk(&gvk) {
+                let api: Api<DynamicObject> = if ac.scope == Scope::Cluster {
+                    Api::all_with(client.clone(), &ar)
+                } else if let Some(namespace) = &resource.metadata.namespace {
+                    Api::namespaced_with(client.clone(), namespace, &ar)
+                } else {
+                    Api::default_namespaced_with(client.clone(), &ar)
+                };
+
+                api.delete(
+                    &resource.name_any(),
+                    &delete_params)
+                    .await?;
+            }
+        }
+
+        Ok(())
     }
 }
 

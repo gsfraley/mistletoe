@@ -33,6 +33,12 @@ async fn main() {
                 .arg(arg!(-s --set <VALUES> "set values to pass to the package"))
         )
         .subcommand(
+            Command::new("uninstall")
+                .about("Uninstall a package from the cluster")
+                .arg(arg!([name] "the name of the installation")
+                    .required(true))
+        )
+        .subcommand(
             Command::new("inspect")
                 .about("Inspects things around Mistletoe and the cluster")
                 .subcommand(
@@ -83,6 +89,10 @@ async fn run_cli(matches: &ArgMatches) -> anyhow::Result<()> {
 
     if let Some(matches) = matches.subcommand_matches("install") {
         install::run_command(&matches).await?;
+    }
+
+    if let Some(matches) = matches.subcommand_matches("uninstall") {
+        uninstall::run_command(&matches).await?;
     }
 
     if let Some(matches) = matches.subcommand_matches("inspect") {
