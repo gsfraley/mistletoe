@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize, Serializer, Deserializer, de::DeserializeOwned};
+use serde::{Serialize, Deserialize, Serializer, Deserializer};
 
 /// This is the input that is passed from the engine to the package for processing.
 /// There is only one field, and that is the freeform `data` field that can take
@@ -7,19 +7,6 @@ use serde::{Serialize, Deserialize, Serializer, Deserializer, de::DeserializeOwn
 pub struct MistInput {
     /// Freeform data field.
     pub data: serde_yaml::Mapping,
-}
-
-impl MistInput {
-    /// Tries to cast the input into any [Deserialize] types, useful for passing
-    /// the input into just about any type the package writer wishes to receive.
-    pub fn try_into_data<'a, T>(&self) -> Result<T, serde_yaml::Error>
-    where
-        T: DeserializeOwned
-    {
-        let serialized = serde_yaml::to_string(&self.data)?;
-        let value = serde_yaml::from_str(&serialized)?;
-        serde_yaml::from_value(value)
-    }
 }
 
 #[derive(Serialize, Deserialize)]
