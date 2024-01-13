@@ -42,7 +42,7 @@ pub async fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     for (_, content) in output.get_files() {
         InstallRef { name: name.to_string(), version: None}
             .apply_resources(&InstallResources::from_str(content)?
-                .label_resources_with(name, 0)?).await?;
+                .label_resources_with(name, None)?).await?;
     }
     
     Ok(())

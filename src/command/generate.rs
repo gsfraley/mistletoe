@@ -1,12 +1,12 @@
-use crate::installation::InstallResources;
 use crate::instance::{MistPackageInstance, MistPackageRef};
+use crate::outputs::*;
 
 use std::fs;
 use std::path::PathBuf;
 
 use anyhow::anyhow;
 use clap::ArgMatches;
-use mistletoe_api::v1alpha1::{MistInput, MistResult, serialize_result};
+use mistletoe_api::v1alpha1::{MistInput, MistResult};
 
 pub fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     let package = matches.get_one::<String>("package").unwrap();
@@ -67,42 +67,11 @@ fn output_result(result: MistResult, mode: OutputMode, name: &str, process: bool
     }
 
     match mode {
-        OutputMode::Raw => Ok(println!("{}", serialize_result(result)?.trim())),
-
-        OutputMode::Yaml => match result {
-            Ok(output) => {
-                for (_, content) in output.get_files() {
-                    if process {
-                        println!("{}", InstallResources::from_str(content)?
-                            .label_resources_with(name, 0)?
-                            .to_string()?)
-                    } else {
-                        println!("{}", content.trim());
-                    }
-                }
-
-                Ok(())
-            },
-            Err(e) => Err(e),
+        OutputMode::Raw => Ok(println!("{}", result.mc_output_raw()?)),
+        OutputMode::Yaml => match process {
+            true => Ok(println!("{}", result.mc_output_processed_yaml(name.to_string(), None)?)),
+            false => Ok(println!("{}", result.mc_output_yaml()?)),
         },
-
-        OutputMode::Dir(path) => match result {
-            Ok(output) => {
-                for (filename, content) in output.get_files() {
-                    let out_path = path.join(PathBuf::from(filename));
-                    if process {
-                        fs::write(out_path, InstallResources::from_str(content)?
-                            .label_resources_with(name, 0)?
-                            .to_string()?)?;
-                    } else {
-                        fs::write(out_path, content.trim())?;
-
-                    }
-                }
-
-                Ok(())
-            },
-            Err(e) => Err(e),
-        },
+        OutputMode::Dir(path) => Ok(result.mc_output_dir(&path)?),
     }
 }

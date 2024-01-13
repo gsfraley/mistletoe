@@ -10,7 +10,7 @@ use serde::{Serialize, Deserialize};
 pub type MistResult = anyhow::Result<MistOutput>;
 
 /// Serialized the result to a YAML string.
-pub fn serialize_result(result: MistResult) -> Result<String, serde_yaml::Error> {
+pub fn serialize_result(result: &MistResult) -> Result<String, serde_yaml::Error> {
     serde_yaml::to_string(&MistResultLayout::from(result))
 }
 
@@ -97,16 +97,16 @@ struct MistResultLayoutData {
     files: IndexMap<String, String>,
 }
 
-impl From<MistResult> for MistResultLayout {
-    fn from(result: MistResult) -> Self {
+impl From<&MistResult> for MistResultLayout {
+    fn from(result: &MistResult) -> Self {
         Self {
             api_version: "mistletoe.dev/v1alpha1".to_string(),
             kind: "MistResult".to_string(),
             data: match result {
                 Ok(output) => MistResultLayoutData {
                     result: "Ok".to_string(),
-                    message: output.message,
-                    files: output.files,
+                    message: output.message.clone(),
+                    files: output.files.clone(),
                 },
                 Err(e) => MistResultLayoutData {
                     result: "Err".to_string(),
@@ -163,7 +163,7 @@ mod tests {
                   name: my-namespace")
                 .to_string());
 
-        let yaml = serialize_result(Ok(mistoutput.clone())).unwrap();
+        let yaml = serialize_result(&Ok(mistoutput.clone())).unwrap();
         assert_eq!(expected_yaml, yaml);
 
         let mistresult_parsed = deserialize_result(&yaml).unwrap();
@@ -180,7 +180,7 @@ mod tests {
               message: 'error: something went wrong'"};
 
         let err_string = "error: something went wrong";
-        let yaml = serialize_result(Err(anyhow!(err_string.to_string()))).unwrap();
+        let yaml = serialize_result(&Err(anyhow!(err_string.to_string()))).unwrap();
         assert_eq!(expected_yaml, yaml);
 
         let mistresult_parsed = deserialize_result(&yaml);

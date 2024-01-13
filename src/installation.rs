@@ -104,14 +104,14 @@ impl InstallRef {
         Ok(())
     }
 
-    pub async fn delete_resources(&self) -> anyhow::Result<()> {
+    pub async fn delete_resources(&self) -> anyhow::Result<Vec<DynamicObject>> {
         let resources = self.get_resources().await?;
 
         let client = Client::try_default().await?;
         let discovery = Discovery::new(client.clone()).run().await?;
         let delete_params = DeleteParams::foreground();
 
-        for resource in resources {
+        for resource in &resources {
             let gvk = if let Some(tm) = &resource.types {
                 GroupVersionKind::try_from(tm)?
             } else {
@@ -136,7 +136,7 @@ impl InstallRef {
             }
         }
 
-        Ok(())
+        Ok(resources)
     }
 }
 
@@ -180,10 +180,13 @@ impl InstallResources {
         Ok(self)
     }
 
-    pub fn label_resources_with(self, name: &str, version: u32) -> anyhow::Result<Self> {
+    pub fn label_resources_with(self, name: &str, version: Option<u32>) -> anyhow::Result<Self> {
         let mut labels = BTreeMap::new();
         labels.insert(TIED_TO_INSTALL_NAME_KEY.to_string(), name.to_string());
-        labels.insert(TIED_TO_INSTALL_VERSION_KEY.to_string(), format!("v{}", version));
+
+        if let Some(version) = version {
+            labels.insert(TIED_TO_INSTALL_VERSION_KEY.to_string(), format!("v{}", version));
+        }
 
         self.label_resources(labels)
     }
