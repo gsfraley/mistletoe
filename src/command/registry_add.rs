@@ -1,6 +1,7 @@
 use clap::ArgMatches;
 
 use crate::config::{ConfigLayout, RegistryLayout, RemoteLayout, GitRemoteLayout};
+use crate::registry::process_registries;
 
 pub fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
     let name = matches.get_one::<String>("name").unwrap();
@@ -20,6 +21,7 @@ pub fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
 
     config.spec.registries.push(registry_layout);
     config.write_to_env()?;
+    process_registries(&config)?;
 
     Ok(())
 }

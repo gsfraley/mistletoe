@@ -1,4 +1,5 @@
 use crate::config::{ConfigLayout, RegistryLayout};
+use crate::registry::process_registries;
 
 use anyhow::anyhow;
 use clap::ArgMatches;
@@ -16,6 +17,7 @@ pub fn run_command(matches: &ArgMatches) -> anyhow::Result<()> {
         .collect();
 
     config.write_to_env()?;
+    process_registries(&config)?;
 
     Ok(())
 }
