@@ -1,9 +1,14 @@
 use crate::config::{MIST_HOME_LOCATION, RemoteLayout, ConfigLayout};
 
+use std::fs;
 use std::path::{Path, PathBuf};
 
 use anyhow::anyhow;
 use git2::Repository;
+use once_cell::sync::Lazy;
+
+pub static MIST_REGISTRIES_LOCATION: Lazy<PathBuf> = Lazy::new(||
+    MIST_HOME_LOCATION.join(Path::new("registries")));
 
 pub struct Remote {
     registry_name: String,
@@ -53,9 +58,7 @@ struct GitRemote {
 
 impl GitRemote {
     fn get_local_registry_path(&self, registry_name: &str) -> PathBuf {
-        MIST_HOME_LOCATION
-            .join(Path::new("registries"))
-            .join(Path::new(registry_name))
+        MIST_REGISTRIES_LOCATION.join(Path::new(registry_name))
     }
     
     fn init(&self, registry_name: &str) -> anyhow::Result<()> {
@@ -95,4 +98,32 @@ impl GitRemote {
         
         if package_path.exists() { Some(package_path) } else { None }
     }
+}
+
+pub fn process_registries(config: &ConfigLayout) -> anyhow::Result<()> {
+    let found_registries = fs::read_dir(&*MIST_REGISTRIES_LOCATION)?
+        .collect::<Result<Vec<fs::DirEntry>, _>>()?.iter()
+        .filter(|entry| entry.path().is_dir())
+        .map(|entry| entry.path().file_name().unwrap().to_str().unwrap().to_string())
+        .collect::<Vec<String>>();
+
+    let registries = config.spec.registries.iter()
+        .map(|registry| registry.name.clone())
+        .collect::<Vec<String>>();
+
+    // Clean all non-declared registries
+    for found_registry in found_registries {
+        if !registries.contains(&found_registry) {
+            fs::remove_dir_all(MIST_REGISTRIES_LOCATION.join(Path::new(&found_registry)))?;
+        }
+    }
+
+    // Init and pull declared registries
+    for registry in &config.spec.registries {
+        let remote = Remote::default_for_name(&registry.name, config)?;
+        remote.init()?;
+        remote.pull()?;
+    }
+
+    Ok(())
 }

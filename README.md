@@ -50,7 +50,6 @@ metadata:
   name: my-namespace
   labels:
     mistletoe.dev/tied-to-install-name: my-namespace
-    mistletoe.dev/tied-to-install-version: v0
 ```
 
 This is one of a nearly-unlimited number of ways to write a package.  ***All you need is a language with a YAML parser that can compile to WebAssembly.***

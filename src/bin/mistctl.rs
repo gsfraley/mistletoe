@@ -30,6 +30,7 @@ async fn main() {
                     .required(true))
                 .arg(arg!(-f --inputfile <FILE> "input file containing values to pass to the package")
                     .value_parser(value_parser!(PathBuf)))
+                .arg(arg!(-o --output <TYPE> "output type, can be 'details' or 'yaml'"))
                 .arg(arg!(-s --set <VALUES> "set values to pass to the package"))
         )
         .subcommand(
@@ -52,6 +53,7 @@ async fn main() {
                         .about("Inspects the given cluster installation")
                         .arg(arg!([name] "the name of the installation")
                             .required(true))
+                        .arg(arg!(-o --output <TYPE> "output type, can be 'yaml' or 'list'"))
                 )
         )
         .subcommand(
