@@ -101,7 +101,7 @@ pub fn mistletoe_package(input: TokenStream) -> TokenStream {
         pub fn __mistletoe_generate(ptr: *const u8, len: usize) -> *mut [usize; 2] {
             let input_str = unsafe { std::str::from_utf8(std::slice::from_raw_parts(ptr, len)).unwrap() };
             let result = __mistletoe_generate_result(input_str);
-            let mut output_str = std::mem::ManuallyDrop::new(mistletoe_api::v1alpha1::serialize_result(result).unwrap());
+            let mut output_str = std::mem::ManuallyDrop::new(mistletoe_api::v1alpha1::serialize_result(&result).unwrap());
             let retptr = Box::into_raw(Box::new([output_str.as_mut_ptr() as usize, output_str.len()]));
             retptr
         }
