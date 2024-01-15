@@ -1,3 +1,5 @@
+#![feature(let_chains)]
+
 mod base;
 mod deployment;
 mod secret;
@@ -45,12 +47,12 @@ pub struct Inputs {
 
 #[derive(Deserialize)]
 pub struct UserValue {
-    #[serde(flatten, default = "UserAuthValue::Random")]
-    auth: UserAuthValue,
+    #[serde(flatten, default)]
+    auth: Option<UserAuthValue>,
 }
 
 #[derive(Deserialize)]
-#[serde(tag = "authType")]
+#[serde(untagged)]
 pub enum UserAuthValue {
     Hash {
         hash: String,
@@ -58,12 +60,11 @@ pub enum UserAuthValue {
     Password {
         password: String,
     },
-    Random,
 }
 
 pub fn generate(inputs: Inputs) -> MistResult {
     let output = MistOutput::new()
-        .with_files_from_map(generate_secret(&inputs)?.get_files())
+        .with_files_from_map(generate_secrets(&inputs)?.get_files())
         .with_files_from_map(generate_deployment(&inputs)?.get_files())
         .with_files_from_map(generate_service(&inputs)?.get_files());
 
