@@ -103,6 +103,14 @@ impl MistOutput {
     pub fn get_exports(&self) -> &Option<String> {
         &self.exports
     }
+
+    /// Deserializes the exports object into the given type.
+    pub fn exports_into<T: serde::de::DeserializeOwned>(&self) -> anyhow::Result<T> {
+        match &self.exports {
+            Some(exports) => serde_yaml::from_str::<T>(exports).map_err(|e| anyhow!(e)),
+            None => Err(anyhow!("no exports found")),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -188,6 +196,10 @@ mod tests {
                 otherKey: otherValue
             ");
 
+        let mut expected_exports = IndexMap::new();
+        expected_exports.insert("name".to_string(), "my-namespace".to_string());
+        expected_exports.insert("otherKey".to_string(), "otherValue".to_string());
+
         let mistoutput = MistOutput::new()
             .with_message("warning: nothing went wrong".to_string())
             .with_file("namespace.yaml".to_string(), indoc!("
@@ -206,6 +218,11 @@ mod tests {
 
         let mistresult_parsed = deserialize_result(&yaml).unwrap();
         assert_eq!(mistoutput, mistresult_parsed);
+
+        let exports = mistresult_parsed
+            .exports_into::<IndexMap<String, String>>()
+            .unwrap();
+        assert_eq!(expected_exports, exports);
     }
 
     #[test]
