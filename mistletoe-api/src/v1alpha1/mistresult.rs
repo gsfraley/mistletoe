@@ -29,6 +29,12 @@ pub struct MistOutput {
     /// Each key is a relative path in the output directory that the content will be
     /// rendered to, and the keys are the content.
     files: IndexMap<String, String>,
+
+    /// This is a YAML output file (similar to the input file).
+    /// 
+    /// This returns YAML that can be used or deserialized by other packages to get
+    /// exported information, usernames/passwords, etc.
+    exports: Option<String>,
 }
 
 impl MistOutput {
@@ -37,6 +43,7 @@ impl MistOutput {
         Self {
             message: None,
             files: IndexMap::new(),
+            exports: None,
         }
     }
 
@@ -69,6 +76,19 @@ impl MistOutput {
         self
     }
 
+    /// Sets the exports file.
+    pub fn set_exports(&mut self, exports: String) {
+        self.exports = Some(exports);
+    }
+    
+    /// Sets the exports file.
+    /// 
+    /// This is the same as `set_exports` but can be used in chaining.
+    pub fn with_exports(mut self, exports: String) -> Self {
+        self.set_exports(exports);
+        self
+    }
+
     /// Retrieves the attached message on this object.
     pub fn get_message(&self) -> &Option<String> {
         &self.message
@@ -77,6 +97,11 @@ impl MistOutput {
     /// Retrieves the map of files stored by this object.
     pub fn get_files(&self) -> &IndexMap<String, String> {
         &self.files
+    }
+
+    /// Retrieves the exports object.
+    pub fn get_exports(&self) -> &Option<String> {
+        &self.exports
     }
 }
 
@@ -95,6 +120,8 @@ struct MistResultLayoutData {
     message: Option<String>,
     #[serde(default, skip_serializing_if = "IndexMap::is_empty")]
     files: IndexMap<String, String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    exports: Option<String>,
 }
 
 impl From<&MistResult> for MistResultLayout {
@@ -107,11 +134,13 @@ impl From<&MistResult> for MistResultLayout {
                     result: "Ok".to_string(),
                     message: output.message.clone(),
                     files: output.files.clone(),
+                    exports: output.exports.clone(),
                 },
                 Err(e) => MistResultLayoutData {
                     result: "Err".to_string(),
                     message: Some(e.to_string()),
                     files: IndexMap::new(),
+                    exports: None,
                 },
             }
         }
@@ -124,6 +153,7 @@ impl Into<MistResult> for MistResultLayout {
             "Ok" => MistResult::Ok(MistOutput {
                 message: self.data.message,
                 files: self.data.files,
+                exports: self.data.exports,
             }),
             "Err" => MistResult::Err(match self.data.message {
                 Some(message) => anyhow!(message),
@@ -141,7 +171,7 @@ mod tests {
 
     #[test]
     fn test_mistresult_ok() {
-        let expected_yaml = indoc!{"
+        let expected_yaml = indoc!("
             apiVersion: mistletoe.dev/v1alpha1
             kind: MistResult
             data:
@@ -152,7 +182,11 @@ mod tests {
                   apiVersion: v1
                   kind: Namespace
                   metadata:
-                    name: my-namespace"};
+                    name: my-namespace
+              exports: |
+                name: my-namespace
+                otherKey: otherValue
+            ");
 
         let mistoutput = MistOutput::new()
             .with_message("warning: nothing went wrong".to_string())
@@ -160,8 +194,12 @@ mod tests {
                 apiVersion: v1
                 kind: Namespace
                 metadata:
-                  name: my-namespace")
-                .to_string());
+                  name: my-namespace
+                ").to_string())
+            .with_exports(indoc!("
+                name: my-namespace
+                otherKey: otherValue
+                ").to_string());
 
         let yaml = serialize_result(&Ok(mistoutput.clone())).unwrap();
         assert_eq!(expected_yaml, yaml);
@@ -172,12 +210,13 @@ mod tests {
 
     #[test]
     fn test_mistresult_err() {
-        let expected_yaml: &str = indoc!{"
+        let expected_yaml: &str = indoc!("
             apiVersion: mistletoe.dev/v1alpha1
             kind: MistResult
             data:
               result: Err
-              message: 'error: something went wrong'"};
+              message: 'error: something went wrong'
+            ");
 
         let err_string = "error: something went wrong";
         let yaml = serialize_result(&Err(anyhow!(err_string.to_string()))).unwrap();

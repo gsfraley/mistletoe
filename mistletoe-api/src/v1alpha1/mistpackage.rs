@@ -81,13 +81,14 @@ mod tests {
 
     #[test]
     fn test_mistpackage() {
-        let expected_yaml = indoc! {"
+        let expected_yaml = indoc!("
             apiVersion: mistletoe.dev/v1alpha1
             kind: MistPackage
             metadata:
               name: example-nginx
               labels:
-                mistletoe.dev/group: mistletoe-examples"};
+                mistletoe.dev/group: mistletoe-examples
+            ");
 
         let mut labels = IndexMap::new();
         labels.insert("mistletoe.dev/group".to_string(), "mistletoe-examples".to_string());
