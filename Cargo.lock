@@ -1283,7 +1283,6 @@ dependencies = [
 name = "mistletoe-mariadb"
 version = "0.1.2"
 dependencies = [
- "anyhow",
  "indexmap 2.1.0",
  "k8s-openapi",
  "mistletoe-api",
