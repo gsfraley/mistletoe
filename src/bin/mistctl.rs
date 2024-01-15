@@ -8,6 +8,7 @@ use mistletoe::command::*;
 async fn main() {
     let matches = Command::new(env!("CARGO_CRATE_NAME"))
         .about("Polyglot Kubernetes package manager")
+        .arg(arg!(-d --debug "enable debug output"))
         .subcommand(
             Command::new("generate")
                 .about("Generate output YAML from a package")
@@ -80,7 +81,11 @@ async fn main() {
         .get_matches();
 
     if let Err(e) = run_cli(&matches).await {
-        eprintln!("{}{} {}", "error".bold().red(), ":".bold(), e.to_string());
+        if matches.get_flag("debug") {
+            eprintln!("{}{} {:?}", "error".bold().red(), ":".bold(), e);
+        } else {
+            eprintln!("{}{} {}", "error".bold().red(), ":".bold(), e);
+        }
     }
 }
 

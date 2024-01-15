@@ -42,6 +42,8 @@ members = [
     "mistletoe-api",
     "mistletoe-bind",
     "mistletoe-macros",
+
+    "packages/mariadb",
 ]
 exclude = [
     "examples/namespace-example",

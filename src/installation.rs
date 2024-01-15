@@ -6,7 +6,6 @@ use kube::{Client, Discovery, Api, ResourceExt};
 use kube::api::{ListParams, PatchParams, Patch, DeleteParams};
 use kube::core::{DynamicObject, GroupVersionKind};
 use kube::discovery::{ApiResource, ApiCapabilities, Scope};
-use serde_yaml::Mapping;
 
 pub const TIED_TO_INSTALL_NAME_KEY: &'static str = "mistletoe.dev/tied-to-install-name";
 pub const TIED_TO_INSTALL_VERSION_KEY: &'static str = "mistletoe.dev/tied-to-install-version";
@@ -146,28 +145,21 @@ pub struct InstallResources {
 
 impl InstallResources {
     pub fn from_str(resources_str: &str) -> anyhow::Result<Self> {
-        let documents = match serde_yaml::from_str::<serde_yaml::Value>(resources_str)? {
-            serde_yaml::Value::Mapping(document) => vec![document],
-            serde_yaml::Value::Sequence(documents) => documents.into_iter()
-                .map(|value| if let serde_yaml::Value::Mapping(document) = value {
-                    Ok(document)
-                } else {
-                    Err(anyhow!("unexpected YAML document value {:?}", value))
-                })
-                .collect::<Result<Vec<Mapping>, _>>()?,
-            value => return Err(anyhow!("unexpected root YAML value {:?}", value)),
-        };
+        let mut resources = Vec::new();
 
-        Ok(Self { resources: documents.into_iter()
-            .map(|document| serde_yaml::Value::Mapping(document))
-            .map(|value| serde_yaml::from_value(value))
-            .collect::<Result<Vec<DynamicObject>, _>>()? })
+        for resource_str in resources_str.split("\n---\n") {
+            let resource = serde_yaml::from_str::<DynamicObject>(resource_str)?;
+            resources.push(resource);
+        }
+
+        Ok(Self { resources })
     }
 
     pub fn to_string(&self) -> anyhow::Result<String> {
         Ok(self.resources.iter()
             .map(serde_yaml::to_string)
             .collect::<Result<Vec<String>, _>>()?
+            .into_iter().map(|s| s.trim().to_string()).collect::<Vec<_>>()
             .join("\n---\n"))
     }
 

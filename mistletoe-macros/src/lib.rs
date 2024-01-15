@@ -94,7 +94,7 @@ pub fn mistletoe_package(input: TokenStream) -> TokenStream {
 
         fn __mistletoe_generate_result(input_str: &str) -> mistletoe_api::v1alpha1::MistResult {
             let input: mistletoe_api::v1alpha1::MistInput = mistletoe_bind::include::serde_yaml::from_str(input_str)?;
-            generate(mistletoe_api::v1alpha1::yaml_transmute(input)?)
+            generate(mistletoe_api::v1alpha1::yaml_transmute(input.data)?)
         }
         
         #[wasm_bindgen::prelude::wasm_bindgen]

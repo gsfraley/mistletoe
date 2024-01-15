@@ -89,6 +89,23 @@ impl MistOutput {
         self
     }
 
+    /// Adds all the files from the given map.
+    /// 
+    /// This is the same as `set_file` for each key/value pair in the map.
+    pub fn set_files_from_map(&mut self, files: &IndexMap<String, String>) {
+        files.iter().for_each(|(filename, content)| {
+            self.set_file(filename.clone(), content.clone());
+        });
+    }
+
+    /// Adds all the files from the given map.
+    /// 
+    /// This is the same as `set_files_from_map` but can be used in chaining.
+    pub fn with_files_from_map(mut self, files: &IndexMap<String, String>) -> Self {
+        self.set_files_from_map(files);
+        self
+    }
+
     /// Retrieves the attached message on this object.
     pub fn get_message(&self) -> &Option<String> {
         &self.message
@@ -146,7 +163,7 @@ impl From<&MistResult> for MistResultLayout {
                 },
                 Err(e) => MistResultLayoutData {
                     result: "Err".to_string(),
-                    message: Some(e.to_string()),
+                    message: Some(format!("{:?}", e)),
                     files: IndexMap::new(),
                     exports: None,
                 },

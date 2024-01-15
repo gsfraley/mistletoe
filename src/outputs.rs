@@ -36,6 +36,7 @@ impl McOutputYaml for &Vec<DynamicObject> {
         Ok(self.iter()
             .map(serde_yaml::to_string)
             .collect::<Result<Vec<String>, _>>()?
+            .into_iter().map(|s| s.trim().to_string()).collect::<Vec<_>>()
             .join("\n---\n"))
     }
 }
@@ -79,8 +80,8 @@ impl McOutputRaw for MistResult {
 
 impl McOutputYaml for MistResult {
     fn mc_output_yaml(self) -> anyhow::Result<String> {
-        Ok(self?.get_files().iter().map(|(_, content)| content.to_string())
-            .collect::<Vec<String>>()
+        Ok(self?.get_files().iter().map(|(_, content)| content.trim().to_string())
+            .collect::<Vec<_>>()
             .join("\n---\n"))
     }
 }
