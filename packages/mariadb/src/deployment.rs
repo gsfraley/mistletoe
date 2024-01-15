@@ -40,7 +40,7 @@ pub fn generate_deployment(inputs: &Inputs) -> MistResult {
 
                             ports: Some(vec![
                                 ContainerPort {
-                                    name: Some("default".to_string()),
+                                    name: Some("mariadb".to_string()),
                                     container_port: 3306,
                                     protocol: Some("TCP".to_string()),
                                     ..Default::default()

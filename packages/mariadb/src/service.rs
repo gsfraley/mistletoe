@@ -19,7 +19,7 @@ pub fn generate_service(inputs: &Inputs) -> MistResult {
             
             ports: Some(vec![
                 ServicePort {
-                    name: Some("default".to_string()),
+                    name: Some("mariadb".to_string()),
                     port: 3306,
                     protocol: Some("TCP".to_string()),
                     ..Default::default()

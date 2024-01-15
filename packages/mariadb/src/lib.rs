@@ -40,14 +40,24 @@ pub struct Inputs {
     service_type: String,
 
     #[serde(default)]
-    users: IndexMap<String, UserAuthValue>,
+    users: IndexMap<String, UserValue>,
 }
 
 #[derive(Deserialize)]
-#[serde(tag = "type")]
+pub struct UserValue {
+    #[serde(flatten, default = "UserAuthValue::Random")]
+    auth: UserAuthValue,
+}
+
+#[derive(Deserialize)]
+#[serde(tag = "authType")]
 pub enum UserAuthValue {
-    Hash(#[serde(rename = "value")] String),
-    Password(#[serde(rename = "value")] String),
+    Hash {
+        hash: String,
+    },
+    Password {
+        password: String,
+    },
     Random,
 }
 

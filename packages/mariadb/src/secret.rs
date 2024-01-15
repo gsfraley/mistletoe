@@ -5,12 +5,12 @@ use k8s_openapi::api::core::v1::Secret;
 pub fn generate_secret(inputs: &Inputs) -> MistResult {
     let mut secret_values = IndexMap::new();
 
-    if let Some(auth) = inputs.users.get("root") {
-        match auth {
-            UserAuthValue::Hash(hash) => {
+    if let Some(user) = inputs.users.get("root") {
+        match &user.auth {
+            UserAuthValue::Hash { hash } => {
                 secret_values.insert("MARIADB_ROOT_PASSWORD_HASH".to_string(), hash.clone());
             },
-            UserAuthValue::Password(password) => {
+            UserAuthValue::Password { password } => {
                 secret_values.insert("MARIADB_ROOT_PASSWORD".to_string(), password.clone());
             },
             UserAuthValue::Random => {
