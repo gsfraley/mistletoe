@@ -61,12 +61,13 @@ mod tests {
 
     #[test]
     fn test_mistinput() {
-        let expected_yaml = indoc! {"
+        let expected_yaml = indoc!("
             apiVersion: mistletoe.dev/v1alpha1
             kind: MistInput
             data:
               name: my-nginx
-              namespace: my-namespace"};
+              namespace: my-namespace
+            ");
 
         let mut data = serde_yaml::Mapping::new();
         data.insert("name".into(), "my-nginx".into());

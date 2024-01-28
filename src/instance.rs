@@ -12,6 +12,9 @@ use wasmer::{
     Memory,
     TypedFunction,
     imports,
+    Function,
+    FunctionEnv,
+    FunctionEnvMut,
 };
 
 
@@ -63,6 +66,11 @@ impl MistPackageRef {
     }
 }
 
+struct Env {
+    memory: Option<Memory>,
+    alloc: Option<TypedFunction<i32, i32>>,
+}
+
 pub struct MistPackageInstance {
     local: bool,
     store: Store,
@@ -97,8 +105,28 @@ impl MistPackageInstance {
     }
 
     fn init(local: bool, mut store: Store, module: Module) -> anyhow::Result<Self> {
-        let import_object = imports! {};
+        let function_env = FunctionEnv::new(&mut store, Env { memory: None, alloc: None });
+
+        fn get_random_bytes(mut function_env: FunctionEnvMut<Env>, len: i32) -> i32 {
+            let mut bytes = vec![0; len as usize];
+            getrandom::getrandom(&mut bytes).unwrap();
+
+            let (env, mut store) = function_env.data_and_store_mut();
+            let ptr = env.alloc.as_mut().unwrap().call(&mut store, len).unwrap();
+            env.memory.as_mut().unwrap().view(&store).write(ptr as u64, &bytes).unwrap();
+
+            ptr
+        }
+
+        let import_object = imports! {
+            "env" => {
+                "__mistletoe_get_random_bytes" => Function::new_typed_with_env(&mut store, &function_env, get_random_bytes),
+            },
+        };
+
         let instance = Instance::new(&mut store, &module, &import_object)?;
+        function_env.as_mut(&mut store).memory = Some(instance.exports.get_memory("memory")?.clone());
+        function_env.as_mut(&mut store).alloc = Some(instance.exports.get_typed_function(&mut store, "__mistletoe_alloc")?);
 
         Ok(Self {
             local,

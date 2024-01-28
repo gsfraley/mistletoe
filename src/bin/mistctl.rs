@@ -77,10 +77,16 @@ async fn main() {
                             .required(true))
                 )
         )
+        .arg(arg!(-d --debug "enable debug output")
+            .global(true))
         .get_matches();
 
     if let Err(e) = run_cli(&matches).await {
-        eprintln!("{}{} {}", "error".bold().red(), ":".bold(), e.to_string());
+        if matches.get_flag("debug") {
+            eprintln!("{}{} {:?}", "error".bold().red(), ":".bold(), e);
+        } else {
+            eprintln!("{}{} {}", "error".bold().red(), ":".bold(), e);
+        }
     }
 }
 

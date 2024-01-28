@@ -1,5 +1,5 @@
 [package]
-name = "mistletoe-namespace-example"
+name = "mistletoe-mariadb"
 version = "0.1.2"
 edition = "2021"
 
@@ -7,8 +7,14 @@ edition = "2021"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-indoc = "2.0"
+anyhow = "1.0"
+base16 = "0.2"
+base64 = "0.21"
+indexmap = "2.1"
+k8s-openapi = { version = "0.20", features = ["v1_28"] }
 mistletoe-api = { version = "0.1.2", path = "../../mistletoe-api" }
 mistletoe-bind = { version = "0.1.2", path = "../../mistletoe-bind" }
 serde = { version = "1.0", features = ["derive"] }
+serde_yaml = "0.9"
+sha1 = "0.10"
 wasm-bindgen = "0.2"
