@@ -134,6 +134,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "base16"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d27c3610c36aee21ce8ac510e6224498de4228ad772a171ed65643a24693a5a8"
+
+[[package]]
 name = "base64"
 version = "0.21.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1285,6 +1291,8 @@ dependencies = [
 name = "mistletoe-mariadb"
 version = "0.1.2"
 dependencies = [
+ "anyhow",
+ "base16",
  "base64",
  "indexmap 2.1.0",
  "k8s-openapi",
@@ -1292,6 +1300,7 @@ dependencies = [
  "mistletoe-bind",
  "serde",
  "serde_yaml",
+ "sha1",
  "wasm-bindgen",
 ]
 
@@ -1894,6 +1903,17 @@ dependencies = [
  "ryu",
  "serde",
  "unsafe-libyaml",
+]
+
+[[package]]
+name = "sha1"
+version = "0.10.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3bf829a2d51ab4a5ddf1352d8470c140cadc8301b2ae1789db023f01cedd6ba"
+dependencies = [
+ "cfg-if",
+ "cpufeatures",
+ "digest",
 ]
 
 [[package]]

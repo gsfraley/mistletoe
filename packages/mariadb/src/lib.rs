@@ -22,8 +22,11 @@ mistletoe_package! {"
     mistletoe.dev/group: mistletoe
 "}
 
-fn default_image() -> String { "mariadb:latest".to_string() }
+const LATEST_IMAGE: &str = "mariadb:11.2";
+
+fn default_image() -> String { LATEST_IMAGE.to_string() }
 fn default_service_type() -> String { "ClusterIP".to_string() }
+fn default_true() -> bool { true }
 
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -40,6 +43,9 @@ pub struct Inputs {
     resources: Option<ResourceRequirements>,
     #[serde(default = "default_service_type")]
     service_type: String,
+
+    #[serde(default = "default_true")]
+    auto_upgrade: bool,
 
     #[serde(default)]
     users: IndexMap<String, UserValue>,

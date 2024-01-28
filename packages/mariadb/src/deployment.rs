@@ -57,18 +57,14 @@ pub fn generate_deployment(inputs: &Inputs) -> MistResult {
                                     ..Default::default()
                                 }
                             ]),
-
                             ..Default::default()
                         }
                     ],
-
                     ..Default::default()
                 }),
             },
-
             ..Default::default()
         }),
-
         ..Default::default()
     };
         

@@ -3,6 +3,8 @@ use super::*;
 use base64::prelude::*;
 use mistletoe_bind::random::get_random_bytes;
 use k8s_openapi::api::core::v1::Secret;
+use sha1::Digest;
+use sha1::Sha1;
 
 pub fn generate_secrets(inputs: &Inputs) -> MistResult {
     let output = MistOutput::new()
@@ -15,19 +17,22 @@ pub fn generate_secrets(inputs: &Inputs) -> MistResult {
 fn generate_secret_env(inputs: &Inputs) -> MistResult {
     let mut secret_values = IndexMap::new();
 
-    if let Some(user) = inputs.users.get("root")
-        && let Some(auth) = &user.auth
-    {
-        match auth {
-            UserAuthValue::Hash { hash } => {
+    if inputs.auto_upgrade {
+        secret_values.insert("MARIADB_AUTO_UPGRADE".to_string(), "true".to_string());
+    }
+
+    if let Some(user) = inputs.users.get("root") {
+        match &user.auth {
+            Some(UserAuthValue::Hash { hash }) => {
                 secret_values.insert("MARIADB_ROOT_PASSWORD_HASH".to_string(), hash.clone());
             },
-            UserAuthValue::Password { password } => {
-                secret_values.insert("MARIADB_ROOT_PASSWORD".to_string(), password.clone());
+            Some(UserAuthValue::Password { password }) => {
+                secret_values.insert("MARIADB_ROOT_PASSWORD_HASH".to_string(), hash_into_mysql_native_password(password)?);
+            },
+            None => {
+                secret_values.insert("MARIADB_RANDOM_ROOT_PASSWORD".to_string(), "true".to_string());
             },
         }
-    } else {
-        secret_values.insert("MARIADB_RANDOM_ROOT_PASSWORD".to_string(), "true".to_string());
     }
 
     let mut metadata = generate_base_metadata(inputs);
@@ -54,7 +59,7 @@ fn generate_secret_scripts(inputs: &Inputs) -> MistResult {
         .insert("app.kubernetes.io/component".to_string(), "secret-scripts".to_string());
 
     let mut scripts = IndexMap::new();
-    scripts.insert("010-users.sql".to_string(), generate_users_sql(inputs));
+    scripts.insert("001-users.sql".to_string(), generate_users_sql(inputs)?);
 
     let secret = Secret {
         metadata,
@@ -68,7 +73,7 @@ fn generate_secret_scripts(inputs: &Inputs) -> MistResult {
     Ok(output)
 }
 
-fn generate_users_sql(inputs: &Inputs) -> String {
+fn generate_users_sql(inputs: &Inputs) -> anyhow::Result<String> {
     let mut sql = String::new();
 
     for (username, user) in &inputs.users {
@@ -76,20 +81,23 @@ fn generate_users_sql(inputs: &Inputs) -> String {
             continue;
         }
 
-        match &user.auth {
-            Some(UserAuthValue::Hash { hash }) => {
-                sql.push_str(&format!("CREATE USER '{}'@'%' IDENTIFIED BY PASSWORD '{}';\n", username, hash));
-            },
-            Some(UserAuthValue::Password { password }) => {
-                sql.push_str(&format!("CREATE USER '{}'@'%' IDENTIFIED BY '{}';\n", username, password));
-            },
-            None => {
-                sql.push_str(&format!("CREATE USER '{}'@'%' IDENTIFIED BY '{}';\n", username, generate_random_base64(32)));
-            },
-        }
+        sql.push_str(&format!("CREATE USER '{}'@'%' IDENTIFIED BY PASSWORD '{}';\n", username, match &user.auth {
+            Some(UserAuthValue::Hash { hash }) => hash.clone(),
+            Some(UserAuthValue::Password { password }) => hash_into_mysql_native_password(password)?,
+            None => hash_into_mysql_native_password(&generate_random_base64(32))?,
+        }));
     }
 
-    sql
+    Ok(sql)
+}
+
+fn hash_into_mysql_native_password(password: &str) -> anyhow::Result<String> {
+    let mut hasher1 = Sha1::new();
+    hasher1.update(password.as_bytes());
+    let mut hasher2 = Sha1::new();
+    hasher2.update(&hasher1.finalize());
+    
+    Ok(format!("*{}", base16::encode_upper(&hasher2.finalize()[..]).to_uppercase()))
 }
 
 fn generate_random_base64(len: usize) -> String {
